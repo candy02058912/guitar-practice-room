@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Practice engine checks</title><body><pre id="results">Running…</pre><script type="module">
+import { StrumDetector, PracticeRound, pairKey, validSession } from './engine.js';
+const results=[];
+function test(name, run) { try { run(); results.push('PASS '+name); } catch(e) { results.push('FAIL '+name+': '+e.message); } }
+function assert(value, message='assertion failed') { if(!value) throw new Error(message); }
+test('First strum starts the clock and counts once', () => { const r=new PracticeRound(); assert(r.remaining(10000)===60000); r.hit(20000); assert(r.count===1 && r.remaining(20500)===59500); });
+test('Counts just before deadline; excludes exact deadline and after', () => { const r=new PracticeRound(); r.hit(1000); r.hit(60999); assert(!r.hit(61000)); assert(!r.hit(62000)); assert(r.count===2 && r.remaining(62000)===0); });
+test('Silence and calibrated background do not trigger', () => { const d=new StrumDetector(); for(let t=0;t<1500;t+=16)d.calibrate(.004); for(let t=1500;t<10000;t+=16)assert(!d.feed(.004+Math.sin(t)*.001,t)); });
+test('Sustained ringing is counted once, fresh attack counts again', () => { const d=new StrumDetector(); let hits=0; for(let t=0;t<2500;t+=16){ let rms=t<160?.001:t<1200?.12*Math.exp(-(t-160)/700):t<1400?.002:.12*Math.exp(-(t-1400)/700); if(d.feed(rms,t))hits++; } assert(hits===2,'got '+hits); });
+test('Attack cooldown rejects a double hit within 230 ms', () => { const d=new StrumDetector(); assert(d.feed(.12,0)); for(let t=16;t<100;t+=16)d.feed(.001,t); assert(!d.feed(.12,100)); for(let t=116;t<300;t+=16)d.feed(.001,t); assert(d.feed(.12,300)); });
+test('Sensitivity catches softer attacks', () => { assert(!new StrumDetector(1).feed(.015,0)); assert(new StrumDetector(100).feed(.015,0)); });
+test('Chord pair grouping ignores order', () => assert(pairKey('A','D')===pairKey('D','A')));
+test('Stored records reject invalid counts and dates', () => { const s={id:'1',chords:['A','D'],count:22,date:'2026-10-05T12:00:00Z'}; assert(validSession(s)); assert(!validSession({...s,count:-1})); assert(!validSession({...s,count:2.3})); assert(!validSession({...s,date:'oops'})); });
+document.getElementById('results').textContent=results.join('\n'); document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></body></html>

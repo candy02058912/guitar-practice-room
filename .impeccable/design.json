@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T09:17:11.998072+00:00",
+  "title": "Design System: Practice room",
+  "extensions": {
+    "shadows": [],
+    "motion": [
+      {
+        "name": "progress",
+        "value": "transform .12s linear",
+        "purpose": "Timer track; reduced-motion disables transitions."
+      },
+      {
+        "name": "button-hover",
+        "value": "transform .16s ease-out",
+        "purpose": "Small primary-action lift."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-max",
+        "value": "1199px"
+      },
+      {
+        "name": "stacked-max",
+        "value": "760px"
+      },
+      {
+        "name": "small-max",
+        "value": "360px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "html": "<button class=\"primary\">Enable mic &amp; get ready</button>",
+      "css": ":root {\n  color-scheme: light;\n  --paper: #fff9db;\n  --surface: #ffffff;\n  --ink: #292447;\n  --muted: #635b78;\n  --line: #ded6ef;\n  --green: #6640c8;\n  --green-hover: #4e2cab;\n  --tint: #eee6ff;\n  --orange: #a52364;\n  --pink: #ff96c1;\n  --yellow: #ffe46a;\n  --mint: #d4f5dc;\n  --radius: 16px;\n  font-family: 'DM Sans', sans-serif;\n  color: var(--ink);\n  background: var(--paper);\n  font-synthesis: none;\n}\n.primary { background: var(--green); color: #fff; min-height: 52px; transition: background .16s ease-out, transform .16s ease-out; }"
+    },
+    {
+      "name": "Practice timer",
+      "kind": "custom",
+      "html": "<div class=\"timer\">1:00</div>",
+      "css": ":root {\n  color-scheme: light;\n  --paper: #fff9db;\n  --surface: #ffffff;\n  --ink: #292447;\n  --muted: #635b78;\n  --line: #ded6ef;\n  --green: #6640c8;\n  --green-hover: #4e2cab;\n  --tint: #eee6ff;\n  --orange: #a52364;\n  --pink: #ff96c1;\n  --yellow: #ffe46a;\n  --mint: #d4f5dc;\n  --radius: 16px;\n  font-family: 'DM Sans', sans-serif;\n  color: var(--ink);\n  background: var(--paper);\n  font-synthesis: none;\n}\n.timer { font: 500 96px/1.12 'Fredoka', sans-serif; color: var(--green); letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin: 3px 0 14px; }"
+    },
+    {
+      "name": "Swap chords",
+      "kind": "button",
+      "html": "<button class=\"swap\" aria-label=\"Swap chords\">Swap</button>",
+      "css": ":root {\n  color-scheme: light;\n  --paper: #fff9db;\n  --surface: #ffffff;\n  --ink: #292447;\n  --muted: #635b78;\n  --line: #ded6ef;\n  --green: #6640c8;\n  --green-hover: #4e2cab;\n  --tint: #eee6ff;\n  --orange: #a52364;\n  --pink: #ff96c1;\n  --yellow: #ffe46a;\n  --mint: #d4f5dc;\n  --radius: 16px;\n  font-family: 'DM Sans', sans-serif;\n  color: var(--ink);\n  background: var(--paper);\n  font-synthesis: none;\n}\n.swap { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; padding: 7px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--green); margin-top: 23px; }"
+    }
+  ],
+  "narrative": {
+    "overview": "Brighter and more playful, as requested by the user, with unchanged functionality.",
+    "keyCharacteristics": [
+      "Rounded Fredoka lettering and DM Sans controls",
+      "Purple timer on lavender, mint log and pink note",
+      "Sunshine background with geometric smiling sun"
+    ],
+    "rules": [],
+    "dos": [
+      "Keep controls readable and measurements stable."
+    ],
+    "donts": [
+      "Do not change functionality during a visual refresh."
+    ]
+  }
+}
