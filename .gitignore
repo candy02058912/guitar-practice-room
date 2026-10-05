@@ -1,0 +1,10 @@
+.tailnet-public/
+_site/
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+.agents/
+.aws/
+.codex/

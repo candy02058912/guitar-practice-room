@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9db">
+  <title>Practice room · One minute changes</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script type="module" src="app.js?v=2"></script>
+</head>
+<body>
+  <header class="site-header"><a class="wordmark" href="./" aria-label="Practice room home"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4v20M14 4v20M22 4v20M3 9h22M3 19h22"/><circle cx="14" cy="9" r="3"/><circle cx="6" cy="19" r="3"/></svg>practice room<span class="wordmark-dot">.</span></a><span class="header-note">A little practice, every day.</span></header>
+  <main>
+    <section class="intro"><svg class="intro-art" viewBox="0 0 140 140" aria-hidden="true"><path d="M70 5 81 33 106 17 104 47 135 46 116 70 135 94 104 93 106 123 81 107 70 135 59 107 34 123 36 93 5 94 24 70 5 46 36 47 34 17 59 33Z" fill="#ff96c1"/><circle cx="70" cy="70" r="33" fill="#ffe46a"/><path d="M54 64v7m32-7v7m-29 10q13 14 26 0" fill="none" stroke="#292447" stroke-width="5" stroke-linecap="round"/></svg><h1><span>One minute</span> <span>changes</span></h1><p>Two chords. One minute. A little better each time.</p></section>
+    <div class="workspace">
+      <section class="practice" aria-label="Practice timer">
+        <div class="practice-top"><h2>Your chord pair</h2><span class="duration">60 seconds</span></div>
+        <div class="chord-pair"><label>First chord<select id="chord-a" aria-label="First chord"></select></label><button class="swap" id="swap-chords" type="button" aria-label="Swap first and second chords" title="Swap chords"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 11h22m-6-6 6 6-6 6M27 23H5m6-6-6 6 6 6"/></svg></button><label>Second chord<select id="chord-b" aria-label="Second chord"></select></label></div>
+        <div class="timer-area"><div class="status" id="status" role="status">Make yourself comfortable</div><div class="timer" id="timer" aria-label="60 seconds remaining">1:00</div><div class="time-track" aria-hidden="true"><div id="time-fill"></div></div><div class="count-line"><strong id="count">0</strong><span id="count-label">estimated changes</span></div></div>
+        <p class="instruction" id="instruction">Get your fingers ready. Your first strum starts the clock.</p>
+        <div class="main-actions"><button class="primary" id="listen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 10v2a6 6 0 0 0 12 0v-2M12 18v3m-3 0h6"/></svg>Enable mic & get ready</button><button class="secondary" id="manual">Use manual mode</button><button class="secondary" id="cancel" hidden>Cancel session</button><button class="primary" id="tap" hidden>Count a change <kbd>Space</kbd></button></div>
+        <p class="error" id="error" role="alert" hidden></p>
+        <div class="result" id="result" hidden><h3>A minute well spent.</h3><p>Check your count before adding it to your practice log.</p><label class="result-label" for="final-count">Changes completed</label><div class="result-controls"><button id="minus" class="step" aria-label="Subtract one change">−</button><input id="final-count" type="number" min="0" max="999" step="1" inputmode="numeric" value="0"><button id="plus" class="step" aria-label="Add one change">+</button><button class="primary" id="save">Save session</button></div><button class="text-button" id="discard">Discard & try again</button></div>
+        <details class="mic-settings" id="mic-settings"><summary>Microphone & counting</summary><div class="settings-body"><div class="level-row"><span>Input level</span><meter id="level" min="0" max="0.2" value="0" aria-label="Microphone input level"></meter></div><label for="sensitivity">Strum sensitivity <output id="sensitivity-value">Balanced</output></label><input type="range" id="sensitivity" min="1" max="100" value="55"><div class="range-labels"><span>Ignore more noise</span><span>Catch softer strums</span></div><p>Alternate chords and strum once per chord. Each detected strum counts as one, including the first. This estimates changes; it cannot identify chords or check accuracy. Adjust your final count if needed.</p><p>Keep the room quiet and your device close to the guitar. Microphone audio is processed here, never recorded or uploaded.</p></div></details>
+      </section>
+      <aside class="sidebar"><section class="log-section"><div class="section-heading"><h2>Your practice log</h2><span id="session-total">0 sessions</span></div><p class="log-context" id="log-context">A ↔ D · this device</p><div class="personal-best" id="personal-best" hidden><span>Personal best for this pair</span><strong id="best">0 <small>changes</small></strong></div><div id="history"></div><div class="empty-log" id="empty-log"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 10h30v46H17zM24 23h16M24 32h16M24 41h10M24 6v8M40 6v8"/></svg><h3>Your first minute starts here.</h3><p>Finish a round and save your count.<br>Watch the small wins add up.</p></div><button class="text-button" id="export" hidden>Download practice log</button></section><section class="practice-note"><h2>Make every change count.</h2><p>Choose a pair you’re working on. Aim for clean chords, keep moving, and see what a minute can do.</p><div class="note-rule"></div><p class="note-small">Some days are faster. Every day is practice.</p></section></aside>
+    </div>
+    <footer><span>Made for your guitar journey.</span><span>Saved on this browser · No account needed</span></footer>
+  </main>
+</body>
+</html>
