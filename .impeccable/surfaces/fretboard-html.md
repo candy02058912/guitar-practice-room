@@ -10,7 +10,7 @@ Mode: Operate. A learner with a guitar wants to connect note names and locations
 
 ## Direction contract
 THESIS: A small note map becomes a recall exercise with visible level progress. Teach through a bounded set of playable notes.
-OWN-WORLD: Inherit Practice room's Fredoka and DM Sans, purple controls, yellow paper, lavender practice area, mint guide and pink encouragement.
+OWN-WORLD: Offer both palettes through the shared Palette selector: default Pancake from the user’s blog, or Original pastel with purple actions, lavender prompts, mint guides and pink accents. The following colors describe Pancake. Inherit Practice room's Fredoka and DM Sans, warm brown controls, cream paper, pale peach practice area, honey guide and peach encouragement.
 STORY: Explore three notes, recall their locations in six prompts, then review results and repeat or advance. Hints and self-assessment support a guitar in the user's hands.
 FIRST VIEWPORT: Existing shared navigation and heading above the familiar practice-panel/sidebar layout. A labeled region selector, large prompt, horizontal string diagram and primary action anchor the main panel; note locations and the learning rationale sit beside it.
 FORM: Narrow extension of existing tools with an agreed exercise sequence; no seed or new visual world. The signature interaction connects recalled locations to level completion. Feedback highlights a selected fret without moving controls; respect reduced motion.

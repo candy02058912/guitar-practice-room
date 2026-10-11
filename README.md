@@ -1,6 +1,10 @@
-# Practice room
+# smallpancake’s guitar practice room
+
+The companion tools for smallpancake’s guitar practice diary, so anyone can follow along without an account.
 
 A small, dependency-free guitar practice toolbox with a one-minute chord-change timer, a metronome and fretboard practice with note-name or staff answers. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
+
+Use **Palette** in the header to choose **Pancake**, the default cream, honey, peach and warm brown colors from [smallpancake’s personal blog](http://smallpancakes.nekoweb.org/), or **Original pastel**, the earlier purple, mint, pink and yellow colors. The choice is shared across the tools, remembered in this browser and synchronized between open tabs. If storage is blocked, the chosen colors still apply on the current page. `tests-palette.html` checks the palette switcher.
 
 ## USB guitar input (including Mustang Micro Plus)
 

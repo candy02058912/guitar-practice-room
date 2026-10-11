@@ -79,7 +79,10 @@ try{
   style.textContent=(await (await fetch('./fretboard.css')).text()).replaceAll(':hover','.test-hover');d.head.append(style);
   try{
    const current=d.querySelector('.level-list button[aria-current]');current.classList.add('test-hover');
-   const css=frame.contentWindow.getComputedStyle(current);assert(css.color==='rgb(255, 255, 255)'&&css.backgroundColor==='rgb(78, 44, 171)','selected hover must keep dark background and readable text');
+   const css=frame.contentWindow.getComputedStyle(current);
+   const luminance=color=>color.match(/\d+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+   const [dark,light]=[luminance(css.color),luminance(css.backgroundColor)].sort((a,b)=>a-b);
+   assert((light+.05)/(dark+.05)>=4.5,'selected hover must retain readable text contrast');
    assert(current.querySelector('.level-status').textContent.includes('recalls'));
   }finally{style.remove()}
  });

@@ -1,4 +1,4 @@
-# Guitar practice tools
+# smallpancake’s guitar practice room
 
 <!-- impeccable:product-schema 1 -->
 
@@ -9,10 +9,15 @@ web
 Delegated by the user. Plain HTML, CSS and JavaScript: no build step or dependencies, served locally or over HTTPS.
 
 ## Users
-A guitar learner following Justin Guitar who wants tools to track personal progress.
+A guitar learner following Justin Guitar, and followers of smallpancake’s guitar practice diary who want to practice along using the same tools and track their own progress.
 
 ## Product Purpose
+The site accompanies smallpancake’s guitar practice diary and welcomes its audience to use the same chord-change, metronome and fretboard tools. The public name is **smallpancake’s guitar practice room**. Visitors can practice without an account; progress stays in their own browser. No social handle or profile URL has been supplied.
+
 The chord-change tool supports one-minute chord changes: start the timer on the first strum, estimate counts from subsequent strums, review and correct the result, and save progress on this device.
+
+## Visual identity
+The user authorized two selectable palettes in the shared header. **Pancake** is the default, using the kawaii pastel colors of their [personal blog](http://smallpancakes.nekoweb.org/): cream paper, honey and peach surfaces, tan borders and warm brown actions, with sage success feedback. **Original pastel** restores purple actions, yellow paper, lavender prompts, mint guides and pink accents. Both retain Fredoka and DM Sans, the existing layout and practice behavior. The choice persists locally across tools and synchronizes between open tabs; blocked storage still allows switching colors on the current page.
 
 ## Operating Context
 Hands occupied by a guitar. User confirmed one strum per chord change with automatic counting and correction before saving.

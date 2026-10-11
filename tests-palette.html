@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Palette checks</title><pre id="results">Running…</pre><iframe id="app" title="Palette test" width="1100" height="1700"></iframe><script type="module">
+const results=[],key='practice-room.palette.v1',backup=localStorage.getItem(key),frame=document.getElementById('app');
+const assert=(x,m='assertion failed')=>{if(!x)throw Error(m)};
+async function test(name,fn){try{await fn();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
+const load=page=>new Promise(resolve=>{frame.onload=resolve;frame.src=page+'?palette-test='+Date.now()});
+const select=value=>{const s=frame.contentDocument.getElementById('palette');s.value=value;s.dispatchEvent(new Event('change'))};
+const color=()=>frame.contentWindow.getComputedStyle(frame.contentDocument.documentElement).getPropertyValue('--primary').trim();
+try {
+ localStorage.removeItem(key);await load('index.html');
+ await test('Blog palette defaults correctly; original palette updates page, illustration and browser chrome',()=>{
+ assert(frame.contentDocument.documentElement.dataset.palette==='pancake');select('pastel');assert(localStorage.getItem(key)==='pastel');assert(color()==='#6640c8');assert(frame.contentDocument.querySelector('meta[name="theme-color"]').content==='#fff9db');assert(frame.contentDocument.querySelector('link[rel="icon"]').getAttribute('href').endsWith('favicon-pastel.svg'));assert(frame.contentWindow.getComputedStyle(frame.contentDocument.querySelector('.intro-art path')).fill==='rgb(255, 150, 193)');
+ });
+ await test('Palette persists across all tools and does not change practice records',async()=>{
+ for(const page of ['metronome.html','fretboard.html','staff.html','index.html']){await load(page);assert(frame.contentDocument.getElementById('palette').value==='pastel',page+' selection');assert(color()==='#6640c8',page+' color')}
+ const before=Object.fromEntries(Object.entries(localStorage).filter(([k])=>k!==key));
+ select('pancake');assert(color()==='#76513d');const after=Object.fromEntries(Object.entries(localStorage).filter(([k])=>k!==key));assert(JSON.stringify(before)===JSON.stringify(after),'storage changed: '+JSON.stringify(before)+' -> '+JSON.stringify(after));
+ });
+ await test('Invalid stored preference falls back to Pancake; changes from other tabs synchronize',async()=>{
+ localStorage.setItem(key,'invalid');await load('fretboard.html');assert(color()==='#76513d');frame.contentWindow.dispatchEvent(new StorageEvent('storage',{key,newValue:'pastel'}));assert(color()==='#6640c8');assert(frame.contentDocument.getElementById('palette').value==='pastel');
+ });
+ await test('Palette control fits narrow screens in both palettes',async()=>{frame.width=340;for(const value of ['pastel','pancake']){select(value);await new Promise(r=>setTimeout(r,50));assert(frame.contentDocument.documentElement.scrollWidth<=frame.contentWindow.innerWidth);assert(frame.contentDocument.getElementById('palette').getBoundingClientRect().height>=44)}});
+ await test('Blocked storage still allows palette changes',async()=>{
+ await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=`<!doctype html><base href="${location.href}"><script>Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}})<\/script><script src="palette.js"><\/script><select id="palette"><option value="pancake">Pancake</option><option value="pastel">Original pastel</option></select>`});
+ select('pastel');assert(frame.contentDocument.documentElement.dataset.palette==='pastel');
+ });
+}finally{backup===null?localStorage.removeItem(key):localStorage.setItem(key,backup)}
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></html>
