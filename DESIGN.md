@@ -89,3 +89,7 @@ All IDs, inputs, event bindings and behavior remain unchanged. The primary actio
 - Preserve keyboard focus, touch target sizes, tabular measurements and reduced-motion support.
 - Use the self-hosted fonts; no remote font request is needed at runtime.
 - Do not change timing, microphone processing, counting or storage as part of visual refinements.
+
+### Toolbox and metronome
+
+A shared navigation row uses purple for the current tool and quiet text for the other. The metronome inherits the same two-column layout, rounded Fredoka measurements, lavender activity band, mint guide and pink practice note. Tempo controls flank a large numeric input; numbered beat indicators show bar position and briefly fill purple (pink on accented beat one). The beat row shrinks to fit six beats on small screens. Settings remain below the Start and Tap tempo actions, with explicit labels and visible focus.

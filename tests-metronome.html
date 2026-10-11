@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Metronome checks</title><body><pre id="results">Running…</pre><iframe id="app" title="Metronome under test" width="1100" height="1000"></iframe><script type="module">
+import { BeatClock, TapTempo, Metronome, normalizeTempo } from './metronome-engine.js';
+const results=[];
+function assert(value,message='assertion failed'){if(!value)throw new Error(message)}
+async function test(name,run){try{await run();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
+const close=(a,b)=>Math.abs(a-b)<.00001;
+await test('Tempo normalizes empty, invalid and out-of-range values',()=>{
+ assert(normalizeTempo('')===80);assert(normalizeTempo('bad',90)===90);assert(normalizeTempo(1)===40);assert(normalizeTempo(300)===240);assert(normalizeTempo(81.6)===82);
+});
+await test('Audio clock keeps exact beat spacing despite irregular scheduler calls',()=>{
+ const clock=new BeatClock(120,4);clock.reset(0);let events=[];
+ for(let now=0;now<3;now+=.023)events.push(...clock.due(now));
+ assert(events.length===7,'expected seven beats');for(let i=0;i<events.length;i++){assert(close(events[i].time,.04+i*.5),'beat time drift');assert(events[i].beat===i%4,'bar position')}
+});
+await test('Late scheduling resynchronizes without a burst of missed beats',()=>{
+ const c=new BeatClock(240,4);c.reset(0);c.due(0);const due=c.due(15);assert(due.length===1&&due[0].beat===0&&close(due[0].time,15.04));
+});
+await test('Tempo changes affect following intervals; 3-beat bars wrap correctly',()=>{
+ const c=new BeatClock(60,3);c.reset(0);assert(c.due(0)[0].beat===0);c.bpm=120;const b=c.due(1)[0];assert(b.beat===1);assert(close(c.due(1.5)[0].time,1.54));assert(c.due(2)[0].beat===0);
+});
+await test('Tap tempo averages taps, rejects double clicks and resets after a pause',()=>{
+ const t=new TapTempo();assert(t.tap(0)===null);assert(t.tap(500)===120);assert(t.tap(520)===null);assert(t.tap(1000)===120);assert(t.tap(4000)===null);assert(t.tap(5000)===60);
+});
+class FakeAudio {
+ constructor(){this.currentTime=0;this.state='running';this.notes=[];this.gains=[];this.destination={}}
+ resume(){return Promise.resolve()}
+ close(){this.state='closed';return Promise.resolve()}
+ createGain(){const values=[];this.gains.push(values);return{gain:{setValueAtTime:(v,t)=>values.push([v,t]),linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){},disconnect(){}}}
+ createOscillator(){const note={frequency:{setValueAtTime(v){note.pitch=v}},connect(){},disconnect(){},start(t){note.time=t},stop(t){if(t===undefined)note.cancelled=true}};this.notes.push(note);return note}
+}
+await test('Accents, mute, live tempo and meter changes use the audio timeline',async()=>{
+ const audio=new FakeAudio(),p=new Metronome({createContext:()=>audio});
+ try{
+  p.configure({bpm:120,beats:4,volume:.6});await p.start();assert(audio.notes[0].pitch===1200);assert(close(audio.notes[0].time,.04));
+  audio.currentTime=.5;p.schedule();assert(audio.notes[1].pitch===800);
+  p.configure({volume:0,beats:3,bpm:60});assert(audio.gains[0].at(-1)[0]===0,'mute updates master');assert(audio.notes.every(n=>n.cancelled),'old meter notes cancelled');p.schedule();assert(audio.notes.at(-1).pitch===1200);
+  p.configure({accent:false});audio.currentTime=1.54;p.schedule();assert(audio.notes.at(-1).pitch===800);
+ }finally{p.stop()}
+ assert(audio.state==='closed');assert(p.nodes.size===0&&p.visuals.length===0,'stop clears queue');
+});
+await test('Real Web Audio renders an audible click followed by silence',async()=>{
+ const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+ const audio=new Offline(1,22050,44100),p=new Metronome();
+ p.context=audio;p.master=audio.createGain();p.master.gain.value=.6;p.master.connect(audio.destination);p.state='playing';p.clock.reset(0);p.schedule();
+ const buffer=await audio.startRendering(),samples=buffer.getChannelData(0);
+ assert(samples.slice(1900,3600).some(v=>Math.abs(v)>.01),'click must have audible samples');
+ assert(samples.slice(0,1500).every(v=>Math.abs(v)<.0001),'no click before scheduled time');
+ assert(samples.slice(6000).every(v=>Math.abs(v)<.0001),'click stops');
+});
+await test('Repeated start cannot create multiple metronomes',async()=>{
+ let count=0;const p=new Metronome({createContext:()=>{count++;return new FakeAudio()}});try{await Promise.all([p.start(),p.start()]);assert(count===1)}finally{p.stop()}
+});
+await test('Stop during pending start prevents later audio playback',async()=>{
+ const audio=new FakeAudio();let resolve;audio.resume=()=>new Promise(r=>resolve=r);const p=new Metronome({createContext:()=>audio});const pending=p.start();p.stop();resolve();await pending;assert(p.state==='stopped'&&audio.notes.length===0&&audio.state==='closed');
+});
+await test('Failed audio start returns to stopped state and releases resources',async()=>{
+ const audio=new FakeAudio();audio.resume=()=>Promise.reject(new Error('Audio blocked'));const p=new Metronome({createContext:()=>audio});let rejected=false;try{await p.start()}catch{rejected=true}assert(rejected&&p.state==='stopped'&&audio.state==='closed');
+});
+await test('Interrupted audio stops playback',async()=>{
+ const audio=new FakeAudio(),p=new Metronome({createContext:()=>audio});await p.start();audio.state='suspended';audio.onstatechange();assert(p.state==='stopped'&&audio.state==='closed');
+});
+const frame=document.getElementById('app'),key='practice-room.metronome.v1',backup=localStorage.getItem(key);
+const load=()=>new Promise(resolve=>{frame.onload=resolve;frame.src='./metronome.html?test='+Date.now()});
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+try{
+ localStorage.removeItem(key);await load();let w=frame.contentWindow,d=w.document,$=id=>d.getElementById(id);
+ await test('Metronome navigation, default controls and keyboard-accessible labels load',()=>{
+  assert(d.querySelector('[aria-current="page"]').textContent==='Metronome');assert($('bpm').value==='80');assert($('beat-lights').children.length===4);assert($('metro-toggle').getAttribute('aria-pressed')==='false');assert(d.querySelector('a[href="./"]'),'link back to chord changes');
+ });
+ await test('Tempo buttons, range slider and typed boundaries stay in sync',()=>{
+  $('tempo-plus').click();assert($('bpm').value==='81'&&$('tempo-slider').value==='81');$('tempo-minus').click();assert($('bpm').value==='80');
+  $('tempo-slider').value=100;$('tempo-slider').dispatchEvent(new w.Event('input'));assert($('bpm').value==='100');
+  $('bpm').value=999;$('bpm').dispatchEvent(new w.Event('change'));assert($('bpm').value==='240'&&$('tempo-plus').disabled);
+  $('bpm').value=0;$('bpm').dispatchEvent(new w.Event('change'));assert($('bpm').value==='40'&&$('tempo-minus').disabled);
+  $('bpm').value='';$('bpm').dispatchEvent(new w.Event('change'));assert($('bpm').value==='40');
+ });
+ await test('Meter, accent, mute and tap tempo update the controls',()=>{
+  $('beats-per-bar').value=6;$('beats-per-bar').dispatchEvent(new w.Event('change'));assert($('beat-lights').children.length===6);
+  $('accent-first').click();assert(!$('beat-lights').classList.contains('has-accent'));
+  $('volume').value=0;$('volume').dispatchEvent(new w.Event('input'));assert($('volume-value').textContent==='Muted');
+  let now=0;Object.defineProperty(w.performance,'now',{value:()=>now});$('tap-tempo').click();now=500;$('tap-tempo').click();assert($('bpm').value==='120');
+ });
+ await test('Settings persist across reload without auto-starting audio',async()=>{
+  await load();w=frame.contentWindow;d=w.document;$=id=>d.getElementById(id);
+  assert($('bpm').value==='120'&&$('beats-per-bar').value==='6'&&!$('accent-first').checked&&$('volume').value==='0');assert($('metro-toggle').getAttribute('aria-pressed')==='false');
+ });
+ let audio;Object.defineProperty(w,'AudioContext',{configurable:true,value:class extends FakeAudio{constructor(){super();audio=this}}});
+ await test('Start and Stop work; Space toggles without hijacking form controls',async()=>{
+  $('metro-toggle').click();await wait(20);assert($('metro-toggle').textContent==='Stop metronome');assert(audio.notes.length>0);
+  const key=()=>new w.KeyboardEvent('keydown',{code:'Space',bubbles:true,cancelable:true});$('bpm').dispatchEvent(key());assert($('metro-toggle').textContent==='Stop metronome');
+  d.body.dispatchEvent(key());assert($('metro-toggle').textContent==='Start metronome'&&audio.state==='closed');
+ });
+ await test('Leaving the page stops playback and closes its audio context',async()=>{
+  $('metro-toggle').click();await wait(20);w.dispatchEvent(new w.Event('pagehide'));assert(audio.state==='closed'&&$('metro-toggle').textContent==='Start metronome');
+ });
+ await test('Unavailable audio shows a recoverable error',async()=>{
+  Object.defineProperty(w,'AudioContext',{configurable:true,value:class{constructor(){throw new Error('Audio unavailable')}}});$('metro-toggle').click();await wait(20);assert(!$('metro-error').hidden&&$('metro-error').textContent==='Audio unavailable');assert($('metro-toggle').textContent==='Start metronome');
+ });
+ await test('Six beat indicators fit at desktop and 340px without overflow',async()=>{
+  assert(d.documentElement.scrollWidth<=w.innerWidth);frame.width='340';await wait(30);assert(d.documentElement.scrollWidth<=w.innerWidth,'page overflow');assert($('beat-lights').scrollWidth<=$('beat-lights').clientWidth,'beat row overflow');
+ });
+}catch(e){results.push('FAIL UI setup: '+e.message)}finally{if(backup===null)localStorage.removeItem(key);else localStorage.setItem(key,backup)}
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></body></html>

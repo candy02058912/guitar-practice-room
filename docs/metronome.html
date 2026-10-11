@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9db">
+  <title>Practice room · Metronome</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="style.css?v=4">
+  <script type="module" src="metronome.js?v=1"></script>
+</head>
+<body>
+  <header class="site-header"><a class="wordmark" href="./" aria-label="Practice room home"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4v20M14 4v20M22 4v20M3 9h22M3 19h22"/><circle cx="14" cy="9" r="3"/><circle cx="6" cy="19" r="3"/></svg>practice room<span class="wordmark-dot">.</span></a><span class="header-note">A little practice, every day.</span></header>
+  <main>
+    <nav class="tool-nav" aria-label="Practice tools"><a href="./">One minute changes</a><a href="metronome.html" aria-current="page">Metronome</a></nav>
+    <section class="intro"><h1><span>Find your</span> rhythm</h1><p>A steady beat for every step of your guitar journey.</p></section>
+    <div class="workspace">
+      <section class="practice metronome-panel" aria-label="Metronome">
+        <div class="practice-top"><h2>Metronome</h2><span class="duration">Your pace</span></div>
+        <div class="tempo-controls">
+          <button class="step" id="tempo-minus" aria-label="Decrease tempo by 1 BPM">−</button>
+          <div class="tempo-value"><label for="bpm">Beats per minute</label><input id="bpm" type="number" inputmode="numeric" min="40" max="240" step="1" value="80" aria-describedby="tempo-range"></div>
+          <button class="step" id="tempo-plus" aria-label="Increase tempo by 1 BPM">+</button>
+        </div>
+        <div class="tempo-range"><input id="tempo-slider" type="range" min="40" max="240" step="1" value="80" aria-label="Tempo in beats per minute"><div class="range-labels" id="tempo-range"><span>40 BPM · Take it slow</span><span>240 BPM · Pick it up</span></div></div>
+        <div class="beat-stage"><div id="beat-lights" class="beat-lights" role="list" aria-label="Beats in the bar"></div><p id="metro-status" role="status">Ready when you are.</p></div>
+        <div class="metro-actions"><button id="metro-toggle" class="primary" aria-pressed="false">Start metronome</button><button id="tap-tempo" class="secondary">Tap tempo</button><p id="tap-help" role="status">Tap a few times to match the beat in your head.</p></div>
+        <p class="error" id="metro-error" role="alert" hidden></p>
+        <div class="metro-settings">
+          <div class="meter-settings"><label for="beats-per-bar">Beats per bar<select id="beats-per-bar"><option value="1">1 beat</option><option value="2">2 beats</option><option value="3">3 beats</option><option value="4" selected>4 beats</option><option value="5">5 beats</option><option value="6">6 beats</option></select></label><label class="accent-setting"><input id="accent-first" type="checkbox" checked>Accent first beat</label></div>
+          <label class="volume-label" for="volume">Volume <output id="volume-value">60%</output></label><input id="volume" type="range" min="0" max="100" value="60">
+        </div>
+      </section>
+      <aside class="sidebar"><section class="log-section rhythm-guide"><h2>Small steps. Steady rhythm.</h2><p>Start at a comfortable tempo. Try one downstrum on every click, then keep that rhythm as you change chords.</p><div class="rhythm-example" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span></div><p>The first beat can sound higher to help you hear the start of each bar.</p></section><section class="practice-note"><h2>Let the beat come to you.</h2><p>Clean and comfortable feels better than rushed. When a tempo feels easy, nudge it up a little.</p><div class="note-rule"></div><p class="note-small">Press Space to start or stop. Keep this page open while you play.</p></section></aside>
+    </div>
+    <footer><span>Made for your guitar journey.</span><span>No microphone needed · Settings saved on this browser</span></footer>
+  </main>
+</body>
+</html>

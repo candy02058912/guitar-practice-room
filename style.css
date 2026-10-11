@@ -208,3 +208,60 @@ kbd { font-size: 11px; font-family: inherit; border: 1px solid #ffffff65; border
   .chord-pair { gap: 10px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Toolbox navigation and metronome use the same playful practice-room palette. */
+.tool-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 30px; }
+.tool-nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: none; }
+.tool-nav a:hover { background: var(--tint); color: var(--ink); }
+.tool-nav a[aria-current=page] { background: var(--green); color: white; }
+.tool-nav + .intro { margin-top: 0; }
+.tempo-controls { display: flex; align-items: center; justify-content: center; gap: 25px; margin: 26px 0 12px; }
+.tempo-controls .step { width: 48px; flex-shrink: 0; }
+.tempo-value { text-align: center; min-width: 0; }
+.tempo-value label { display: block; color: var(--muted); font-size: 13px; }
+.tempo-value input { font: 500 80px/1.1 'Fredoka', sans-serif; font-variant-numeric: tabular-nums; color: var(--green); width: 190px; max-width: 100%; text-align: center; background: transparent; border: 0; border-radius: 12px; appearance: textfield; }
+.tempo-value input::-webkit-inner-spin-button, .tempo-value input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.tempo-range { max-width: 410px; margin: 0 auto 24px; }
+.tempo-range input { margin-top: 8px; }
+.beat-stage { background: var(--tint); margin: 0 -30px 22px; padding: 27px 20px 22px; text-align: center; }
+.beat-lights { display: flex; justify-content: center; gap: 12px; }
+.beat-light { display: grid; place-items: center; width: 54px; height: 54px; border: 2px solid #c4b4e4; border-radius: 50%; color: #64517e; font: 500 23px 'Fredoka', sans-serif; }
+.has-accent .beat-light:first-child { border-color: #9a3b68; color: #87305a; background: #ffd3e4; }
+.beat-light.beat-active { background: var(--green); border-color: var(--green); color: white; }
+.has-accent .beat-light:first-child.beat-active { background: #a52364; border-color: #a52364; color: white; }
+#metro-status { font-size: 13px; color: #5f497e; margin: 18px 0 0; min-height: 20px; }
+.metro-actions { display: grid; grid-template-columns: 1.4fr 1fr; align-items: center; gap: 10px; max-width: 410px; margin: 0 auto 24px; }
+#tap-tempo { background: #fff0b2; color: #69500d; font-weight: 700; min-height: 52px; }
+#tap-tempo:hover { background: var(--yellow); }
+#tap-help { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 12px; line-height: 1.5; color: var(--muted); min-height: 18px; }
+.metro-settings { margin: 0 -30px; padding: 22px 30px; background: #faf7ff; border-top: 1px solid var(--line); }
+.meter-settings { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 23px; }
+.meter-settings label { font-size: 13px; }
+.meter-settings select { display: block; min-height: 44px; background: #fff; color: var(--ink); border: 1px solid #b4a4cf; border-radius: 8px; margin-top: 8px; padding: 8px 14px; }
+.accent-setting { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.accent-setting input { width: 20px; height: 20px; accent-color: var(--green); }
+.volume-label { display: flex; justify-content: space-between; font-size: 13px; }
+#volume-value { color: var(--muted); }
+.rhythm-guide h2 { font-size: 27px; max-width: 18ch; }
+.rhythm-guide p { font-size: 14px; line-height: 1.7; color: #43674e; }
+.rhythm-example { display: flex; justify-content: space-between; margin: 25px 0; gap: 10px; }
+.rhythm-example span { background: #f3fff5; border-radius: 50%; width: 44px; height: 44px; display: grid; place-items: center; color: #376b46; font: 500 22px 'Fredoka', sans-serif; }
+.rhythm-example span:first-child { background: var(--yellow); color: var(--ink); }
+@media (max-width: 760px) {
+  .tool-nav { margin: 7px 0 24px; gap: 4px; }
+  .tool-nav a { padding: 10px 13px; font-size: 13px; }
+  .metronome-panel .tempo-controls { gap: 12px; }
+  .tempo-value input { width: 145px; font-size: 72px; }
+  .beat-stage { margin-left: -20px; margin-right: -20px; padding-left: 12px; padding-right: 12px; }
+  .beat-lights { gap: 7px; }
+  .beat-light { width: 43px; height: 43px; font-size: 20px; }
+  .metro-settings { margin-left: -20px; margin-right: -20px; padding: 20px; }
+  .metro-actions { gap: 8px; }
+  .meter-settings { gap: 10px; }
+}
+@media (max-width: 360px) {
+  .beat-stage, .metro-settings { margin-left: -16px; margin-right: -16px; }
+  .beat-light { width: 36px; height: 36px; }
+  .tempo-value input { width: 120px; }
+  .meter-settings { flex-wrap: wrap; }
+}

@@ -1,6 +1,14 @@
 # Practice room
 
-A small, dependency-free guitar practice app. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
+A small, dependency-free guitar practice toolbox with a one-minute chord-change timer and a metronome. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
+
+## Metronome
+
+Open `metronome.html` or choose **Metronome** in the tool navigation. Set 40–240 BPM with the number field, slider, plus/minus buttons or Tap tempo. Choose 1–6 beats per bar, optionally accent beat one, and adjust the volume (0 mutes sound but keeps the beat indicators). Each click is one beat; subdivisions and compound-meter grouping are not included.
+
+Press Start or use Space when focus is outside a form control. Clicks use Web Audio’s clock with a short look-ahead scheduler, following [MDN’s audio scheduling approach](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques). Tempo changes take effect within the short scheduling window; changing beats per bar restarts the bar. Leaving or hiding the page stops playback. No microphone permission is needed.
+
+Tempo, beats, accent and volume are remembered on this browser. If storage is blocked, controls still work for the current visit. Metronome and chord-change practice use separate pages, so switching tools releases their audio resources.
 
 ## GitHub Pages
 
@@ -44,13 +52,13 @@ Open http://localhost:8000 in a current Chrome, Firefox, Edge or Safari browser.
 
 ## Checks
 
-Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
+Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-metronome.html` for timing, audio rendering, lifecycle and metronome interaction checks. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
 
 ## Tailnet access
 
 An optional Tailscale Serve deployment can make the app available privately at your device’s HTTPS hostname under `/guitar/`. Use the full HTTPS hostname so microphone access works. Progress is saved separately in each browser and origin; localhost, tailnet, and GitHub Pages history do not automatically transfer between sites.
 
-Tailscale Serve hosts the four browser files and self-hosted fonts in `.tailnet-public`, independently of the temporary Python preview server. The existing app at `/` is preserved.
+Tailscale Serve hosts the browser files and self-hosted fonts in `.tailnet-public`, independently of the temporary Python preview server. The existing app at `/` is preserved.
 
 After changing the app, refresh the served assets:
 

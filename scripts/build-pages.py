@@ -7,7 +7,7 @@ destination = root / 'docs'
 if destination.exists():
     rmtree(destination)
 destination.mkdir()
-for name in ('index.html', 'style.css', 'app.js', 'engine.js'):
+for name in ('index.html', 'style.css', 'app.js', 'engine.js', 'metronome.html', 'metronome.js', 'metronome-engine.js'):
     copyfile(root / name, destination / name)
 copytree(root / 'assets', destination / 'assets')
 (destination / '.nojekyll').touch()
