@@ -31,12 +31,27 @@ await test('Changing the checked device stops the old stream before opening the 
  const previous=tracks.at(-1);$('audio-input').value='mic';$('audio-input').dispatchEvent(new w.Event('change'));await wait(20);assert(previous.stopped);assert(requests.at(-1).audio.deviceId.exact==='mic');assert($('input-status').textContent.includes('Built-in microphone'));
  $('audio-input').value='usb';$('audio-input').dispatchEvent(new w.Event('change'));await wait(20);
 });
+await test('Input boost raises a quiet preview signal without starting the timer',()=>{
+ amplitude=.0012;now+=16;nextFrame();assert($('input-signal').textContent==='Very quiet');const raw=$('level').value;
+ $('input-boost').value='24';$('input-boost').dispatchEvent(new w.Event('input'));now+=16;nextFrame();
+ assert($('level').value>raw*15&&$('input-signal').textContent==='Signal detected');assert($('input-boost-value').textContent==='+24 dB');assert($('count').textContent==='0'&&$('timer').textContent==='1:00');
+ amplitude=.08;now+=16;nextFrame();assert($('input-signal').textContent.includes('Boost too high'));
+});
 await test('Practice keeps the chosen USB input and locks selection during the round',async()=>{
- const preview=tracks.at(-1);amplitude=.001;$('listen').click();await wait(20);assert(preview.stopped);assert(requests.at(-1).audio.deviceId.exact==='usb');assert($('audio-input').disabled&&$('check-input').disabled);assert($('status').textContent.includes('quiet'));
- now+=1600;nextFrame();amplitude=.12;now+=16;nextFrame();assert($('count').textContent==='1','first USB strum starts count');
+ const preview=tracks.at(-1);amplitude=.00001;$('sensitivity').value='100';$('sensitivity').dispatchEvent(new w.Event('input'));$('listen').click();await wait(20);assert(preview.stopped);assert(requests.at(-1).audio.deviceId.exact==='usb');assert($('audio-input').disabled&&$('check-input').disabled&&$('input-boost').disabled);assert($('status').textContent.includes('quiet'));
+ for(let i=0;i<100;i++){now+=16;nextFrame()}
+ assert($('count').textContent==='0','boosted quiet input must not start timer');
+ amplitude=.0012;now+=16;nextFrame();assert($('count').textContent==='1','quiet USB strum must start count');
+ for(let i=0;i<30;i++){now+=16;amplitude=.0012*Math.exp(-i/6);nextFrame()}
+ assert($('count').textContent==='1','ringing quiet chord counts once');
+ amplitude=.0012;now+=16;nextFrame();assert($('count').textContent==='2','second quiet strum counted');
 });
 await test('Disconnecting USB stops the round and never opens another device',()=>{
  const count=requests.length,active=tracks.at(-1);active.onended();assert(active.stopped);assert(!$('error').hidden&&$('error').textContent.includes('disconnected'));assert(requests.length===count);assert(!$('audio-input').disabled&&$('count').textContent==='0');
+});
+await test('Switching devices clears boost to avoid over-amplifying the next input',()=>{
+ $('audio-input').value='mic';$('audio-input').dispatchEvent(new w.Event('change'));assert($('input-boost').value==='0'&&$('input-boost-value').textContent==='Off');
+ $('audio-input').value='usb';$('audio-input').dispatchEvent(new w.Event('change'));
 });
 await test('Missing USB remains selected and fails without microphone fallback',async()=>{
  devices=devices.filter(device=>device.deviceId!=='usb');$('refresh-inputs').click();await wait(20);assert($('audio-input').value==='usb');assert($('audio-input').selectedOptions[0].disabled);

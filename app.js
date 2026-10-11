@@ -30,7 +30,7 @@ function setStatus(title, instruction) { $('status').textContent = title; $('ins
 function updateControls() {
   const active = ['requesting', 'checking', 'calibrating', 'armed', 'running'].includes(state);
   const canChoose = ['idle', 'checking'].includes(state);
-  $('audio-input').disabled = $('refresh-inputs').disabled = $('check-input').disabled = !canChoose;
+  $('audio-input').disabled = $('refresh-inputs').disabled = $('check-input').disabled = $('input-boost').disabled = !canChoose;
   $('check-input').textContent = state === 'checking' ? 'Stop check' : 'Check input';
   const same = $('chord-a').value === $('chord-b').value;
   $('chord-a').disabled = $('chord-b').disabled = $('swap-chords').disabled = state !== 'idle';
@@ -87,9 +87,11 @@ function tick() {
   if (analyser) {
     analyser.getFloatTimeDomainData(samples);
     let sum = 0, peak = 0; for (const sample of samples) { sum += sample * sample; peak = Math.max(peak, Math.abs(sample)); }
-    const rms = Math.sqrt(sum / samples.length);
+    // Boost the measured envelope, not audio playback. Calibration uses the same scale.
+    const boost = 10 ** (Number($('input-boost').value) / 20);
+    const rms = Math.sqrt(sum / samples.length) * boost;
     $('level').value = rms;
-    $('input-signal').textContent = peak >= 0.98 ? 'Too loud — lower input gain' : rms >= 0.005 ? 'Signal detected' : 'Very quiet';
+    $('input-signal').textContent = peak >= 0.98 ? 'Too loud — lower device input gain' : peak * boost >= 0.98 ? 'Boost too high — reduce input boost' : rms >= 0.005 ? 'Signal detected' : 'Very quiet';
     if (state === 'calibrating') {
       detector.calibrate(rms);
       if (now >= calibrationEnd) {
@@ -235,7 +237,12 @@ async function refreshInputs() {
 }
 $('check-input').addEventListener('click', () => { if (state === 'checking') reset(); else void listen(true); });
 $('refresh-inputs').addEventListener('click', () => { void refreshInputs(); });
+$('input-boost').addEventListener('input', () => {
+  $('input-boost-value').textContent = Number($('input-boost').value) === 0 ? 'Off' : `+${$('input-boost').value} dB`;
+});
 $('audio-input').addEventListener('change', () => {
+  // A boost for a quiet USB device may be excessive for another input.
+  $('input-boost').value = '0'; $('input-boost-value').textContent = 'Off';
   const wasChecking = state === 'checking';
   clearError();
   if (wasChecking) { reset(); void listen(true); }

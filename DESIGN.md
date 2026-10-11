@@ -95,3 +95,5 @@ All IDs, inputs, event bindings and behavior remain unchanged. The primary actio
 A shared navigation row uses purple for the current tool and quiet text for the other. The metronome inherits the same two-column layout, rounded Fredoka measurements, lavender activity band, mint guide and pink practice note. Tempo controls flank a large numeric input; numbered beat indicators show bar position and briefly fill purple (pink on accented beat one). The beat row shrinks to fit six beats on small screens. Settings remain below the Start and Tap tempo actions, with explicit labels and visible focus.
 
 The chord-change input setup uses a labeled device select beside Check input, a compact live level meter, current-source text and a Refresh devices action. It sits above the start action and inherits the existing lavender controls and mobile wrapping. Signal feedback is not announced on every audio frame.
+
+Input boost is a labeled range control with an adjacent dB readout in the audio setup. It follows the existing purple slider treatment, shows feedback on the level meter, and is disabled while a round is active.

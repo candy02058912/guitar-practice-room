@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#fff9db">
   <title>Practice room · One minute changes</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="style.css?v=5">
-  <script type="module" src="app.js?v=3"></script>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script type="module" src="app.js?v=4"></script>
 </head>
 <body>
   <header class="site-header"><a class="wordmark" href="./" aria-label="Practice room home"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4v20M14 4v20M22 4v20M3 9h22M3 19h22"/><circle cx="14" cy="9" r="3"/><circle cx="6" cy="19" r="3"/></svg>practice room<span class="wordmark-dot">.</span></a><span class="header-note">A little practice, every day.</span></header>
@@ -22,6 +22,7 @@
           <label for="audio-input">Audio input</label>
           <div class="input-controls"><select id="audio-input" aria-describedby="input-help"><option value="">System default</option></select><button class="secondary" id="check-input" type="button">Check input</button></div>
           <p id="input-help">USB guitar or microphone. Check input to allow access and reveal device names.</p>
+          <div class="input-boost-control"><label for="input-boost">Input boost <output id="input-boost-value">Off</output></label><input id="input-boost" type="range" min="0" max="40" step="2" value="0" aria-describedby="input-boost-help"><p id="input-boost-help">Quiet USB signal? Try +20 dB while checking input, then raise it gradually. Detection only; headphone volume stays the same. Boost also raises noise.</p></div>
           <div class="level-row"><span id="input-signal">Input off</span><meter id="level" min="0" max="0.2" value="0" aria-label="Audio input level"></meter></div>
           <div class="input-footer"><span id="input-status" role="status">Choose an input before starting.</span><button class="text-button" id="refresh-inputs" type="button">Refresh devices</button></div>
         </div>

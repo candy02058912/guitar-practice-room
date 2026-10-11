@@ -277,3 +277,8 @@ kbd { font-size: 11px; font-family: inherit; border: 1px solid #ffffff65; border
 #input-status { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
 #refresh-inputs { flex-shrink: 0; }
 @media (max-width: 360px) { .input-controls { flex-wrap: wrap; } .input-controls select { flex-basis: 100%; } }
+.input-boost-control { margin: 16px 0; }
+.input-boost-control label { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+#input-boost-value { font-weight: 700; color: var(--green); }
+#input-boost { margin: 10px 0 4px; }
+#input-boost-help { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
