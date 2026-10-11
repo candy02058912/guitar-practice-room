@@ -8,3 +8,6 @@ __pycache__/
 .agents/
 .aws/
 .codex/
+
+# Local visual review captures and preview harnesses
+.impeccable/review/

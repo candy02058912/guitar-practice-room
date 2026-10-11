@@ -1,0 +1,143 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Fretboard checks</title><body><pre id="results">Running…</pre><iframe id="app" title="Fretboard under test" width="1100" height="1300"></iframe><script type="module">
+import {position, locations, choose, readProgress, LEVELS, LEVEL_KEY, readLevels, levelProgress, recordLevel, finishLevel, levelPool} from './fretboard-engine.js';
+const results=[];
+function assert(v,m='assertion failed'){if(!v)throw Error(m)}
+async function test(name,run){try{await run();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
+await test('Standard tuning and octave repeat, including B–C and E–F',()=>{
+ assert(position(1,1).name==='C');assert(position(1,3).name==='D');assert(position(1,5).name==='E');
+ assert(position(5,0).midi===40);assert(position(0,0).midi===64);
+ for(let s=0;s<6;s++)assert(position(s,0).name===position(s,12).name);
+ assert(position(0,1).name==='F');assert(position(1,2).name==='C♯ / D♭');
+});
+await test('Practice scopes include only eligible notes',()=>{
+ assert(locations('starter').map(p=>p.name).join(',')==='C,D,E');
+ assert(locations('full').length===78);
+ assert(locations('first').every(p=>p.fret<=5&&!p.name.includes('♯')));
+});
+await test('Question selection covers all locations before repeating, then favors misses',()=>{
+ const pool=locations('starter'),seen=new Set(),history={'1:5':{hits:0,misses:5}};
+ let first=choose(pool,history,seen,null,()=>.5);assert(first.id==='1:5','missed note should be weighted');
+ const second=choose(pool,history,seen,first.id,()=>.5),third=choose(pool,history,seen,second.id,()=>.5);
+ assert(new Set([first.id,second.id,third.id]).size===3);assert(choose(pool,history,seen,third.id,()=>.5).id!==third.id);
+});
+await test('Corrupt or unavailable storage is safe',()=>{
+ assert(Object.keys(readProgress({getItem(){throw Error()}})).length===0);
+ assert(Object.keys(readProgress({getItem:()=>'{bad'})).length===0);
+ assert(Object.keys(readProgress({getItem:()=>JSON.stringify({'1:5':{hits:2,misses:1},bad:{hits:999,misses:0},'1:3':{hits:'7',misses:0}})})).join()==='1:5');
+});
+await test('All 24 levels have valid pools and progress needs every location twice',()=>{
+ assert(LEVELS.length===24);const path=readLevels({getItem:()=>null});
+ for(const level of LEVELS){
+  const pool=locations(level.id);assert(pool.length>0);
+  for(const p of pool)recordLevel(path,level.id,p.id);
+  assert(!finishLevel(path,level.id),'one recall is not completion');
+  for(const p of pool)recordLevel(path,level.id,p.id);
+  assert(finishLevel(path,level.id));assert(!finishLevel(path,level.id),'completion only awarded once');
+  assert(levelProgress(path,level.id).complete);
+ }
+});
+await test('Level state validates storage and targets unpracticed locations',()=>{
+ const path=readLevels({getItem:()=>JSON.stringify({selected:'invalid',levels:{starter:{complete:true,hits:{'1:1':2,'1:3':-1,'1:5':'2'}}}})});
+ assert(path.selected==='starter');assert(!levelProgress(path,'starter').complete);assert(levelProgress(path,'starter').earned===2);
+ assert(levelPool(path,'starter').every(p=>p.id!=='1:1'));
+ assert(readLevels({getItem(){throw Error()}}).selected==='starter');
+});
+const levelBackup=localStorage.getItem(LEVEL_KEY);
+const frame=document.getElementById('app'),key='practice-room.fretboard.v1',backup=localStorage.getItem(key);
+const load=()=>new Promise(resolve=>{frame.onload=resolve;frame.src='./fretboard.html?test='+Date.now()});
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+try{
+ localStorage.removeItem(key);localStorage.removeItem(LEVEL_KEY);await load();
+ const d=frame.contentDocument,$=id=>d.getElementById(id),click=id=>$(id).click();
+ const correct=()=>{
+  const name=$('prompt').textContent.match(/^Find (.+) on the/);
+  if(name){const p=locations('starter').find(p=>p.name===name[1]);d.querySelector(`[data-position="${p.id}"]`).click()}
+  else {const p=d.querySelector('.target').dataset.position.split(':').map(Number);const n=position(...p).name;[...$('note-answers').children].find(b=>b.textContent===n).click()}
+ };
+ await test('Start hides learning answers and hint does not count as recall',()=>{
+  assert($('note-guide').textContent.includes('Fret 1'));click('start');
+  assert(!$('note-guide').textContent.includes('Fret 1'));assert($('scope').disabled);
+  click('reveal');assert(!$('next').hidden);assert($('feedback').textContent.includes('with help'));
+  assert(Object.values(JSON.parse(localStorage.getItem(key))).reduce((n,v)=>n+v.hits,0)===0);
+ });
+ await test('Wrong answers teach the location and only count once',()=>{
+  click('next');const target=d.querySelector('.target').dataset.position.split(':').map(Number),name=position(...target).name;
+  const wrong=[...$('note-answers').children].find(b=>b.textContent!==name);wrong.click();const stored=localStorage.getItem(key);wrong.click();assert(localStorage.getItem(key)===stored);
+  assert($('feedback').textContent.includes('We’ll revisit'));assert(!$('next').hidden);
+ });
+ await test('Six questions end in recall results with repeat controls',()=>{
+  for(let i=0;i<4;i++){click('next');correct()}
+  assert($('next').textContent==='See results');click('next');
+  assert($('stage-title').textContent==='Round complete');assert($('prompt').textContent.includes('4 of 6'));
+  assert(!$('start').hidden&&$('start').textContent==='Practice another 6');assert(!$('composer'));
+ });
+ await test('Tier groups retain readable current-level hover and disable selection during rounds',async()=>{
+  assert(d.querySelectorAll('.tier-section').length===4);
+  click('start');assert([...d.querySelectorAll('.level-list button')].every(b=>b.disabled));
+  click('explore');
+  const style=d.createElement('style');
+  style.textContent=(await (await fetch('./fretboard.css')).text()).replaceAll(':hover','.test-hover');d.head.append(style);
+  try{
+   const current=d.querySelector('.level-list button[aria-current]');current.classList.add('test-hover');
+   const css=frame.contentWindow.getComputedStyle(current);assert(css.color==='rgb(255, 255, 255)'&&css.backgroundColor==='rgb(78, 44, 171)','selected hover must keep dark background and readable text');
+   assert(current.querySelector('.level-status').textContent.includes('recalls'));
+  }finally{style.remove()}
+ });
+ await test('Typed fret answers use the requested string, validate input and focus the next action',()=>{
+  click('explore');$('scope').value='first';$('scope').dispatchEvent(new Event('change'));click('start');
+  assert(d.activeElement===$('typed-answer'),'answer field is focused');
+  const form=$('typed-answer-form'),input=$('typed-answer');
+  input.value='99';form.requestSubmit();assert(!$('typed-answer-error').hidden&&$('next').hidden,'invalid input must not count');
+  const match=$('prompt').textContent.match(/^Find (.+) on the (.+) string$/);
+  const p=locations('first').find(p=>p.name===match[1]&&['high E','B','G','D','A','low E'][p.string]===match[2]);
+  input.value=String(p.fret);form.requestSubmit();assert($('feedback').textContent.startsWith('Yes!'));assert(d.activeElement===$('next'));
+  click('next');assert(d.activeElement===input&&input.value==='');
+  const highlighted=d.querySelector('.target').dataset.position.split(':').map(Number);
+  input.value=position(...highlighted).name.toLowerCase();form.requestSubmit();assert($('feedback').textContent.startsWith('Yes!'));
+ });
+ await test('Typed note answers accept enharmonic flats and ignore held Enter',()=>{
+  click('explore');$('scope').value='topChromatic';$('scope').dispatchEvent(new Event('change'));
+  const original=frame.contentWindow.Math.random;frame.contentWindow.Math.random=()=>.1;
+  try {
+   click('start');click('reveal');click('next');
+   const highlighted=d.querySelector('.target').dataset.position.split(':').map(Number),note=position(...highlighted);
+   assert(note.name.includes('♯'),'fixture must ask an accidental');
+   $('typed-answer').value=note.name.split(' / ')[1].replace('♭','b');$('typed-answer-form').requestSubmit();
+   assert($('feedback').textContent.startsWith('Yes!'));
+   const event=new frame.contentWindow.KeyboardEvent('keydown',{key:'Enter',repeat:true,bubbles:true,cancelable:true});
+   $('next').dispatchEvent(event);assert(event.defaultPrevented,'held Enter is suppressed');
+  } finally {frame.contentWindow.Math.random=original}
+ });
+ await test('Arrow navigation follows strings and frets without answering',()=>{
+  click('explore');$('scope').value='first';$('scope').dispatchEvent(new Event('change'));click('start');
+  const key=(node,value)=>node.dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown',{key:value,bubbles:true,cancelable:true}));
+  const first=d.querySelector('[data-position="0:0"]');first.focus();key(first,'ArrowRight');assert(d.activeElement.dataset.position==='0:1');
+  key(d.activeElement,'ArrowDown');assert(d.activeElement.dataset.position==='1:1');
+  assert($('next').hidden,'moving focus is not an answer');
+  key(d.activeElement,'End');assert(d.activeElement.dataset.position==='1:5');
+  assert([...d.querySelectorAll('.fret')].filter(b=>b.tabIndex===0&&!b.disabled).length===1,'one board tab stop');
+  click('explore');$('scope').value='starter';$('scope').dispatchEvent(new Event('change'));
+ });
+ await test('Guitar mode requires self-assessment after revealing',()=>{
+  click('explore');$('practice-mode').value='guitar';click('start');
+  assert([...d.querySelectorAll('.fret')].every(b=>b.disabled));click('reveal');assert(!$('remembered').hidden&&$('next').hidden);
+  click('remembered');assert(!$('next').hidden&&$('remembered').hidden);click('next');click('reveal');click('missed');assert(!$('next').hidden);
+ });
+ await test('Scope changes and phone widths retain controls without page overflow',async()=>{
+  click('explore');$('scope').value='full';$('scope').dispatchEvent(new Event('change'));assert(d.querySelectorAll('.fret').length===78);
+  frame.width='360';await wait(100);assert(d.documentElement.scrollWidth<=frame.contentWindow.innerWidth,'page overflow');
+  assert($('board-scroll').scrollWidth>$('board-scroll').clientWidth,'wide fretboard scrolls locally');
+ });
+ await test('A completed level exposes next level and persists selection',async()=>{
+  click('explore');$('practice-mode').value='screen';$('scope').value='starter';$('scope').dispatchEvent(new Event('change'));
+  click('start');for(let i=0;i<6;i++){correct();click('next')}
+  assert(!$('level-celebration').hidden);assert(!$('advance').hidden);
+  assert($('path-count').textContent==='1 / 24 complete');
+  click('advance');assert($('scope').value==='bFirst');
+  await load();assert(frame.contentDocument.getElementById('scope').value==='bFirst');
+  assert(frame.contentDocument.getElementById('path-count').textContent==='1 / 24 complete');
+ });
+ await test('Recall progress survives reload',async()=>{await load();assert(frame.contentDocument.getElementById('progress').textContent.includes('unassisted recalls'))});
+}finally{if(levelBackup===null)localStorage.removeItem(LEVEL_KEY);else localStorage.setItem(LEVEL_KEY,levelBackup);if(backup===null)localStorage.removeItem(key);else localStorage.setItem(key,backup)}
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></body></html>

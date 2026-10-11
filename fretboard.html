@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9db">
+  <title>Practice room · Fretboard</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="style.css?v=6"><link rel="stylesheet" href="fretboard.css?v=5">
+  <script type="module" src="fretboard.js?v=5"></script>
+</head>
+<body>
+  <header class="site-header"><a class="wordmark" href="./" aria-label="Practice room home"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4v20M14 4v20M22 4v20M3 9h22M3 19h22"/><circle cx="14" cy="9" r="3"/><circle cx="6" cy="19" r="3"/></svg>practice room<span class="wordmark-dot">.</span></a><span class="header-note">A little practice, every day.</span></header>
+  <main>
+    <nav class="tool-nav" aria-label="Practice tools"><a href="./">One minute changes</a><a href="metronome.html">Metronome</a><a href="fretboard.html" aria-current="page">Fretboard</a></nav>
+    <section class="intro"><h1><span>Meet the notes.</span><br>Make them yours.</h1><p>Learn the landmarks. Find the notes. Build your recall.</p></section>
+    <div class="workspace">
+      <section class="practice fret-panel" aria-label="Fretboard practice">
+        <div class="practice-top"><h2 id="stage-title">Explore your notes</h2><span class="duration" id="round-count">No rush</span></div>
+        <div class="level-summary">
+          <p id="current-level"></p>
+          <progress id="level-meter" value="0" max="6" aria-label="Current level progress"></progress>
+          <p id="level-goal" class="small-copy"></p>
+        </div>
+        <div class="fret-settings">
+          <label for="scope">Practice level<select id="scope"></select></label>
+          <label for="practice-mode">Answer with<select id="practice-mode"><option value="screen">On-screen quiz</option><option value="guitar">My guitar · self-check</option></select></label>
+        </div>
+        <div class="note-prompt"><h3 id="prompt">Start with C, D & E</h3><p id="prompt-help">Tap a labeled note to hear it. Then find it on your guitar.</p></div>
+        <p class="board-caption" id="board-caption">B is the second-thinnest string. 0 means play it open.</p>
+        <div id="board-scroll" class="board-scroll" tabindex="0" role="region" aria-label="Fretboard; scroll sideways for more frets"><div id="fretboard" class="fretboard"></div></div>
+        <p class="small-copy">Telecaster landmarks: dots at 3, 5, 7 and 9; two dots at 12. They mark frets, not note names.</p>
+        <form id="typed-answer-form" class="typed-answer" hidden novalidate>
+          <label id="typed-answer-label" for="typed-answer">Fret number</label>
+          <div class="typed-answer-controls"><input id="typed-answer" type="text" inputmode="numeric" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="typed-answer-help typed-answer-error"><button type="submit" class="primary">Check answer</button></div>
+          <p id="typed-answer-help" class="small-copy">Type a fret number, then press Enter.</p>
+          <p id="typed-answer-error" class="error" role="alert" hidden></p>
+        </form>
+        <div id="note-answers" class="note-answers" aria-label="Choose a note name" hidden></div>
+        <p id="feedback" class="fret-feedback" role="status" aria-live="polite">Learn the locations first. You can take as long as you like.</p>
+        <p id="keyboard-help" class="small-copy">Keyboard: Tab to a control, then Enter to use it. Arrow keys move between fret positions and note choices.</p>
+        <div class="fret-actions">
+          <button id="start" class="primary">Try 6 questions</button>
+          <button id="reveal" class="secondary" hidden>Show answer</button>
+          <button id="remembered" class="primary" hidden>I knew it</button>
+          <button id="missed" class="secondary" hidden>Still learning</button>
+          <button id="next" class="primary" hidden>Next question</button>
+          <button id="advance" class="primary" hidden>Next level</button>
+          <button id="explore" class="secondary" hidden>Back to explore</button>
+        </div>
+        <p id="audio-error" class="error" role="alert" hidden></p>
+        <noscript><p>This exercise needs JavaScript. Enable it, then reload this page.</p></noscript>
+      </section>
+      <aside class="sidebar">
+        <section class="level-path" aria-labelledby="path-title">
+          <div class="section-heading"><h2 id="path-title">Your fretboard journey</h2><span id="path-count"></span></div>
+          <p class="small-copy">Four tiers. Small steps. Revisit any level or jump ahead.</p>
+          <p id="level-celebration" role="status" hidden></p>
+          <div id="path-list"></div>
+        </section>
+        <section class="log-section note-guide"><h2>Your small patch of the neck</h2><p id="guide-intro">Start small: learn C, D and E on the B string.</p><div id="note-guide"></div><p id="progress">Your recall practice will be saved on this browser.</p></section>
+        <section class="practice-note"><h2>Say it. Find it. Remember it.</h2><p>Say the note name as you play. Look away, find it again, then try it without the diagram.</p><div class="note-rule"></div><p class="note-small">Standard tuning: E A D G B E, thickest to thinnest. Every fret is one semitone. B–C and E–F are one fret apart.</p></section>
+      </aside>
+    </div>
+    <footer><span>Made for your guitar journey.</span><span>No microphone needed · Progress stays on this browser</span></footer>
+  </main>
+</body>
+</html>

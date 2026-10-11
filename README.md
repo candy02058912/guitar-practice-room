@@ -1,6 +1,6 @@
 # Practice room
 
-A small, dependency-free guitar practice toolbox with a one-minute chord-change timer and a metronome. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
+A small, dependency-free guitar practice toolbox with a one-minute chord-change timer, a metronome, and fretboard practice. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
 
 ## USB guitar input (including Mustang Micro Plus)
 
@@ -19,6 +19,26 @@ Open `metronome.html` or choose **Metronome** in the tool navigation. Set 40–2
 Press Start or use Space when focus is outside a form control. Clicks use Web Audio’s clock with a short look-ahead scheduler, following [MDN’s audio scheduling approach](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques). Tempo changes take effect within the short scheduling window; changing beats per bar restarts the bar. Leaving or hiding the page stops playback. No microphone permission is needed.
 
 Tempo, beats, accent and volume are remembered on this browser. If storage is blocked, controls still work for the current visit. Metronome and chord-change practice use separate pages, so switching tools releases their audio resources.
+
+## Fretboard
+
+The diagram includes a position-marker strip matching the Player II Telecaster through fret 12: single dots at 3, 5, 7 and 9, double dots at 12. Markers stay visible during quizzes and only appear for frets in the selected area.
+
+Open `fretboard.html` or choose **Fretboard** in the tool navigation. Start by exploring C, D and E on the B string: frets 1, 3 and 5. Tap a labeled note to hear a synthesized reference tone, then find it on your guitar.
+
+Choose **Try 6 questions** for alternating note-location and note-name questions. Show answer counts as practice with help; an incorrect answer shows the correct location. In **My guitar · self-check**, play the requested note before revealing its location, then choose I knew it or Still learning. This mode uses your judgment, not microphone recognition. Quiz answers are hidden from the reference guide until the round ends.
+
+Questions prioritize locations with fewer earned recalls; within that group, locations are covered before repeating and previous misses have higher selection weight. Recall counts are saved locally, separately from the other tools. The level selector offers 24 levels in four tiers: First notes, Connect strings, Learn the neck, and Sharps & flats. Each level tracks two successful recalls per location; completing a round after reaching that goal earns a permanent completion mark. Hints and wrong answers do not add progress, while guitar self-checks do. Questions prioritize locations with fewer earned recalls. You can revisit or jump ahead freely; the selected level and completion marks survive reloads. Earlier recall totals are preserved separately and do not imply level completion. Standard tuning only. Sharp/flat equivalents share an answer, and open-string and twelfth-fret prompts specify which location to use so both locations receive practice.
+
+Each round ends with recall results and actions to repeat, explore, or advance after completing the current level. The sidebar groups the 24 levels into four independently expandable tiers, with separate level names and recall counts. The current tier opens automatically; all levels remain selectable outside a round. Melody building is no longer part of this tool. Tap notes in explore/results to hear a synthesized reference tone; audio stops when the page is hidden or left. No microphone or account is needed; when storage is blocked, practice still works for the current visit.
+
+`tests-fretboard.html` checks pitch mapping, practice scopes, adaptive selection, storage validation, quiz and self-check scoring, result actions, tier navigation, selected-row hover, persistence and mobile overflow.
+
+### Keyboard practice
+
+Start a round with Tab and Enter. The answer field receives focus automatically: type a fret number (0–12 within the selected area) or a note name such as C, C# or Db, then press Enter. Fret answers apply to the string named in the question. Invalid input asks for correction without counting an attempt. After feedback, Enter continues; after results, Enter repeats the round. Tab reaches hints, next-level controls and other options.
+
+The fretboard and note-choice buttons each occupy one Tab stop. Arrow keys move across frets/between strings or through note choices, and Enter/Space activates the focused button. Home/End go to the first/last available fret on a string or note option. Selects and tier summaries retain normal keyboard behavior. In guitar self-check mode, Enter reveals the answer; Tab chooses I knew it or Still learning and Enter confirms. Holding Enter does not submit repeated answers.
 
 ## GitHub Pages
 
