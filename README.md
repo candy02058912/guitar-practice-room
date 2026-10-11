@@ -2,6 +2,16 @@
 
 A small, dependency-free guitar practice toolbox with a one-minute chord-change timer and a metronome. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
 
+## USB guitar input (including Mustang Micro Plus)
+
+Connect the powered-on interface with a USB data cable. In the chord-change tool, use **Check input** and grant the browser’s microphone permission (this also covers USB audio). Select the Mustang Micro Plus, or the USB audio name shown by your operating system, from **Audio input**. **Refresh devices** rescans the list without opening a microphone.
+
+Strum while checking: the input meter should move while the timer remains at 1:00. Use a clean preset without delay/reverb and pause backing tracks. Listen through headphones on the interface; the tool does not monitor the guitar through the computer. Then click **Enable input & get ready**, stay quiet for calibration, and strum to begin.
+
+A selected device is requested explicitly. If unavailable, the app reports the problem instead of falling back to a laptop microphone. Switching devices during a check closes the previous stream. Input selection is locked during an active exercise; cancel first to change it. The input choice lasts for this page visit. The detector still estimates strums, not chord quality.
+
+[Fender confirms the Mustang Micro Plus can act as a USB recording input](https://www.fender.com/articles/parts-and-accessories/how-to-use-fender-studio-with-compatible-interfaces). The input controls and lifecycle have browser tests; the physical device needs checking on your computer.
+
 ## Metronome
 
 Open `metronome.html` or choose **Metronome** in the tool navigation. Set 40–240 BPM with the number field, slider, plus/minus buttons or Tap tempo. Choose 1–6 beats per bar, optionally accent beat one, and adjust the volume (0 mutes sound but keeps the beat indicators). Each click is one beat; subdivisions and compound-meter grouping are not included.
@@ -52,7 +62,7 @@ Open http://localhost:8000 in a current Chrome, Firefox, Edge or Safari browser.
 
 ## Checks
 
-Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-metronome.html` for timing, audio rendering, lifecycle and metronome interaction checks. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
+Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-input.html` for USB selection, preview and disconnect handling. Open `/tests-metronome.html` for timing, audio rendering, lifecycle and metronome interaction checks. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
 
 ## Tailnet access
 

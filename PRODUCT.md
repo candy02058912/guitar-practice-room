@@ -22,3 +22,6 @@ Microphone permission is required for hands-free use. Sound stays on the device.
 
 ## Metronome
 A second tool provides a steady beat with adjustable tempo, tap tempo, beats per bar, first-beat accent and volume. It uses local audio synthesis with no microphone, and remembers its settings in this browser. The existing chord-change tool remains separately accessible through shared navigation.
+
+## Audio inputs
+The chord-change tool accepts a microphone or a USB guitar input, including the user’s Fender Mustang Micro Plus. An explicit selector and signal check precede a round. Audio remains local; missing selected devices do not fall back to another input.

@@ -265,3 +265,15 @@ kbd { font-size: 11px; font-family: inherit; border: 1px solid #ffffff65; border
   .tempo-value input { width: 120px; }
   .meter-settings { flex-wrap: wrap; }
 }
+
+.input-setup { margin: 0 0 20px; padding-bottom: 15px; border-bottom: 1px solid var(--line); }
+.input-setup > label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.input-controls { display: flex; align-items: center; gap: 10px; }
+.input-controls select { min-width: 0; flex: 1; width: 100%; min-height: 44px; padding: 9px 12px; color: var(--ink); background: #faf7ff; border: 1px solid #b4a4cf; border-radius: 8px; font-size: 13px; text-overflow: ellipsis; }
+.input-controls button { background: var(--tint); color: var(--green); flex-shrink: 0; font-weight: 700; padding: 10px 12px; }
+#input-help { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 9px 0; }
+.input-setup .level-row { margin: 10px 0 0; }
+.input-footer { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+#input-status { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
+#refresh-inputs { flex-shrink: 0; }
+@media (max-width: 360px) { .input-controls { flex-wrap: wrap; } .input-controls select { flex-basis: 100%; } }

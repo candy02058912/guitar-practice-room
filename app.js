@@ -28,12 +28,16 @@ function showError(message) { $('error').textContent = message; $('error').hidde
 function clearError() { $('error').hidden = true; }
 function setStatus(title, instruction) { $('status').textContent = title; $('instruction').textContent = instruction; }
 function updateControls() {
-  const active = ['requesting', 'calibrating', 'armed', 'running'].includes(state);
+  const active = ['requesting', 'checking', 'calibrating', 'armed', 'running'].includes(state);
+  const canChoose = ['idle', 'checking'].includes(state);
+  $('audio-input').disabled = $('refresh-inputs').disabled = $('check-input').disabled = !canChoose;
+  $('check-input').textContent = state === 'checking' ? 'Stop check' : 'Check input';
   const same = $('chord-a').value === $('chord-b').value;
   $('chord-a').disabled = $('chord-b').disabled = $('swap-chords').disabled = state !== 'idle';
-  $('listen').hidden = $('manual').hidden = state !== 'idle';
+  $('listen').hidden = !canChoose;
+  $('manual').hidden = state !== 'idle';
   $('listen').disabled = $('manual').disabled = same;
-  $('cancel').hidden = !active;
+  $('cancel').hidden = !active || state === 'checking';
   $('tap').hidden = !(mode === 'manual' && ['armed', 'running'].includes(state));
   $('result').hidden = state !== 'finished';
   $('mic-settings').hidden = mode === 'manual' && active;
@@ -54,7 +58,8 @@ function releaseAudio() {
   if (stream) { stream.getTracks().forEach(track => { track.onended = null; track.stop(); }); stream = null; }
   if (context) { const oldContext = context; context = null; oldContext.onstatechange = null; void oldContext.close().catch(() => {}); }
   if (wakeLock) { void wakeLock.release().catch(() => {}); wakeLock = null; }
-  analyser = null; $('level').value = 0;
+  analyser = null; $('level').value = 0; $('input-signal').textContent = 'Input off';
+  $('input-status').textContent = 'Input stopped.';
 }
 function reset(message) {
   requestId++; releaseAudio(); state = 'idle'; round = null;
@@ -76,20 +81,21 @@ function registerHit(now) {
   round.hit(now); $('count').textContent = round.count;
 }
 function tick() {
-  if (!['calibrating', 'armed', 'running'].includes(state)) return;
+  if (!['checking', 'calibrating', 'armed', 'running'].includes(state)) return;
   const now = performance.now();
   if (state === 'running' && round.expired(now)) { finish(); return; }
   if (analyser) {
     analyser.getFloatTimeDomainData(samples);
-    let sum = 0; for (const sample of samples) sum += sample * sample;
+    let sum = 0, peak = 0; for (const sample of samples) { sum += sample * sample; peak = Math.max(peak, Math.abs(sample)); }
     const rms = Math.sqrt(sum / samples.length);
     $('level').value = rms;
+    $('input-signal').textContent = peak >= 0.98 ? 'Too loud — lower input gain' : rms >= 0.005 ? 'Signal detected' : 'Very quiet';
     if (state === 'calibrating') {
       detector.calibrate(rms);
       if (now >= calibrationEnd) {
         state = 'armed'; setStatus('Listening for your first strum', 'Take your time. The clock starts when you play.'); updateControls();
       }
-    } else if (detector.feed(rms, now)) registerHit(now);
+    } else if (state !== 'checking' && detector.feed(rms, now)) registerHit(now);
   }
   if (state === 'running') {
     const remaining = round.remaining(now), seconds = Math.ceil(remaining / 1000);
@@ -99,10 +105,11 @@ function tick() {
   }
   frame = requestAnimationFrame(tick);
 }
-async function listen() {
+async function listen(preview = false) {
+  if (state === 'checking') reset();
   if (state !== 'idle') return;
   clearError(); mode = 'mic'; state = 'requesting'; const token = ++requestId;
-  setStatus('Allow microphone access', 'Your browser will ask to use the microphone.'); updateControls();
+  setStatus('Allow audio input access', 'Your browser may call this microphone permission, even for a USB guitar.'); updateControls();
   let pendingContext;
   try {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('UNSUPPORTED');
@@ -110,22 +117,30 @@ async function listen() {
     if (!AudioContext) throw new Error('UNSUPPORTED');
     pendingContext = new AudioContext(); context = pendingContext;
     await context.resume();
-    const acquired = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
+    if (token !== requestId) return;
+    const deviceId = $('audio-input').value;
+    const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+    if (deviceId) audio.deviceId = { exact: deviceId };
+    const acquired = await navigator.mediaDevices.getUserMedia({ audio, video: false });
     if (token !== requestId) { acquired.getTracks().forEach(t => t.stop()); return; }
     stream = acquired;
-    for (const track of stream.getTracks()) track.onended = () => interrupt('The microphone disconnected. Reconnect it and start a new round, or use manual mode.');
+    $('input-status').textContent = `Listening to: ${stream.getTracks()[0]?.label || $('audio-input').selectedOptions[0].textContent}`;
+    void refreshInputs();
+    for (const track of stream.getTracks()) track.onended = () => interrupt('The audio input disconnected. Reconnect it, refresh devices, and check the input before starting again.');
     analyser = context.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0;
     context.createMediaStreamSource(stream).connect(analyser);
     samples = new Float32Array(analyser.fftSize); detector = new StrumDetector(Number($('sensitivity').value)); round = new PracticeRound();
-    state = 'calibrating'; calibrationEnd = performance.now() + 1500;
-    setStatus('Finding the room’s quiet level…', 'Hold off strumming for a moment.'); updateControls();
-    context.onstatechange = () => { if (context && context.state === 'suspended' && ['armed', 'running', 'calibrating'].includes(state)) interrupt('Audio was interrupted. Keep this page open and start a new round.'); };
+    state = preview ? 'checking' : 'calibrating'; calibrationEnd = performance.now() + 1500;
+    if (preview) setStatus('Check your input', 'Strum a chord and watch the input level. The timer will not start.');
+    else setStatus('Finding the input’s quiet level…', 'Hold off strumming for a moment.');
+    updateControls();
+    context.onstatechange = () => { if (context && context.state === 'suspended' && ['checking', 'armed', 'running', 'calibrating'].includes(state)) interrupt('Audio was interrupted. Keep this page open and start a new round.'); };
     void holdScreen(); tick();
   } catch (error) {
     if (token !== requestId) return;
     reset();
-    const messages = { NotAllowedError: 'Microphone access was blocked. Allow it in your browser’s site settings and try again, or use manual mode.', NotFoundError: 'No microphone was found. Connect one, or use manual mode.', NotReadableError: 'Your microphone is unavailable. Close other apps using it and try again, or use manual mode.' };
-    showError(messages[error.name] || 'Microphone listening is unavailable. Open this app on localhost or HTTPS in a supported browser, or use manual mode.');
+    const messages = { OverconstrainedError: 'The selected audio input is unavailable. Reconnect it or choose another input; the app has not switched to your microphone.', NotAllowedError: 'Audio input access was blocked. Allow microphone permission in your browser’s site settings (also required for USB audio), or use manual mode.', NotFoundError: 'The audio input was not found. Connect your USB device with a data cable, refresh devices, or choose another input.', NotReadableError: 'The audio input is unavailable. Close other apps using it and try again, or use manual mode.' };
+    showError(messages[error.name] || 'Audio input is unavailable. Open this app on localhost or HTTPS in a supported browser, or use manual mode.');
   }
 }
 function manual() {
@@ -168,7 +183,7 @@ function renderHistory() {
   }
   $('export').hidden = sessions.length === 0;
 }
-$('listen').addEventListener('click', listen); $('manual').addEventListener('click', manual);
+$('listen').addEventListener('click', () => listen()); $('manual').addEventListener('click', manual);
 $('cancel').addEventListener('click', () => { clearError(); reset(); }); $('discard').addEventListener('click', () => { clearError(); reset(); });
 $('tap').addEventListener('click', () => registerHit(performance.now()));
 document.addEventListener('keydown', event => {
@@ -192,6 +207,39 @@ $('export').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify({ version: 1, sessions }, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob), link = document.createElement('a'); link.href = url; link.download = 'guitar-practice-log.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden && ['calibrating', 'armed', 'running'].includes(state)) interrupt('The round stopped because this page was hidden. Keep it visible while practising so no strums are missed.'); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && ['requesting', 'checking', 'calibrating', 'armed', 'running'].includes(state)) interrupt('The round stopped because this page was hidden. Keep it visible while practising so no strums are missed.'); });
 window.addEventListener('pagehide', () => { requestId++; releaseAudio(); });
 renderHistory(); updateControls(); if (storageWarning) showError(storageWarning);
+
+let deviceListRequest = 0;
+async function refreshInputs() {
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+  const request = ++deviceListRequest;
+  try {
+    const devices = (await navigator.mediaDevices.enumerateDevices()).filter(device => device.kind === 'audioinput' && device.deviceId);
+    if (request !== deviceListRequest) return;
+    const selected = $('audio-input').value;
+    const options = [new Option('System default', '')];
+    for (const [index, device] of devices.entries()) options.push(new Option(device.label || `Audio input ${index + 1}`, device.deviceId));
+    if (selected && !devices.some(device => device.deviceId === selected)) {
+      const missing = new Option('Selected input unavailable — reconnect or choose another', selected);
+      missing.disabled = true; options.push(missing);
+    }
+    $('audio-input').replaceChildren(...options); $('audio-input').value = selected;
+    $('input-help').textContent = devices.some(device => device.label)
+      ? 'For USB guitar, select your Mustang Micro Plus (or its USB audio name), then check the signal.'
+      : 'USB guitar or microphone. Check input to allow access and reveal device names.';
+  } catch {
+    $('input-help').textContent = 'Device list unavailable. Allow audio permission with Check input, then refresh devices.';
+  }
+}
+$('check-input').addEventListener('click', () => { if (state === 'checking') reset(); else void listen(true); });
+$('refresh-inputs').addEventListener('click', () => { void refreshInputs(); });
+$('audio-input').addEventListener('change', () => {
+  const wasChecking = state === 'checking';
+  clearError();
+  if (wasChecking) { reset(); void listen(true); }
+  else $('input-status').textContent = 'Input selected. Use Check input to test it.';
+});
+navigator.mediaDevices?.addEventListener?.('devicechange', () => { void refreshInputs(); });
+void refreshInputs();
