@@ -4,27 +4,35 @@ export class StrumDetector {
     this.sensitivity = sensitivity;
     this.floor = 0.003;
     this.envelope = 0;
+    this.lastLevel = 0;
     this.lastHit = -Infinity;
-    this.peak = 0;
+    this.settledSince = null;
     this.ready = true;
   }
   calibrate(rms) {
     this.floor = this.floor * 0.94 + rms * 0.06;
     this.envelope = rms;
+    this.lastLevel = rms;
   }
   feed(rms, now) {
     const threshold = Math.max(0.004, 0.045 * Math.pow(0.12, this.sensitivity / 100), this.floor * 3.5);
     const previous = this.envelope;
     this.envelope = previous * 0.8 + rms * 0.2;
-    if (rms < this.peak * 0.55 || rms < threshold * 0.7) this.ready = true;
-    const attack = rms > Math.max(previous * 1.55, previous + threshold * 0.4);
+    // Re-arm after the attack settles, even if the previous chord is still loud.
+    // A continuous rise cannot re-arm itself and count as multiple strums.
+    if (rms <= this.lastLevel * 1.03 || rms < threshold * 0.7) {
+      if (this.settledSince === null) this.settledSince = now;
+      if (now - this.settledSince >= 64) this.ready = true;
+    } else {
+      this.settledSince = null;
+    }
+    this.lastLevel = rms;
+    const attack = rms > Math.max(previous * 1.3, previous + threshold * 0.4);
     const hit = this.ready && rms > threshold && attack && now - this.lastHit >= 230;
     if (hit) {
       this.lastHit = now;
-      this.peak = rms;
+      this.settledSince = null;
       this.ready = false;
-    } else if (!this.ready) {
-      this.peak = Math.max(this.peak, rms);
     }
     return hit;
   }

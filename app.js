@@ -1,4 +1,4 @@
-import { StrumDetector, PracticeRound, pairKey, validSession } from './engine.js';
+import { StrumDetector, PracticeRound, pairKey, validSession } from './engine.js?v=2';
 const $ = id => document.getElementById(id);
 const chords = ['A', 'D', 'E', 'Am', 'Dm', 'Em', 'C', 'G', 'F', 'Bm', 'B7', 'A7', 'D7', 'E7', 'G7', 'C7', 'Fmaj7'];
 const storageKey = 'practice-room.sessions.v1';

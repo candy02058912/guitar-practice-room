@@ -46,6 +46,11 @@ await test('Practice keeps the chosen USB input and locks selection during the r
  assert($('count').textContent==='1','ringing quiet chord counts once');
  amplitude=.0012;now+=16;nextFrame();assert($('count').textContent==='2','second quiet strum counted');
 });
+await test('Quick USB strums count over an audible boosted chord tail',()=>{
+ for(let i=0;i<30;i++){now+=16;amplitude=.0008;nextFrame()}
+ assert($('count').textContent==='2','tail must not add a strum');
+ amplitude=.0012;now+=16;nextFrame();assert($('count').textContent==='3','overlapping quiet USB strum must count');
+});
 await test('Disconnecting USB stops the round and never opens another device',()=>{
  const count=requests.length,active=tracks.at(-1);active.onended();assert(active.stopped);assert(!$('error').hidden&&$('error').textContent.includes('disconnected'));assert(requests.length===count);assert(!$('audio-input').disabled&&$('count').textContent==='0');
 });

@@ -7,6 +7,30 @@ test('First strum starts the clock and counts once', () => { const r=new Practic
 test('Counts just before deadline; excludes exact deadline and after', () => { const r=new PracticeRound(); r.hit(1000); r.hit(60999); assert(!r.hit(61000)); assert(!r.hit(62000)); assert(r.count===2 && r.remaining(62000)===0); });
 test('Silence and calibrated background do not trigger', () => { const d=new StrumDetector(); for(let t=0;t<1500;t+=16)d.calibrate(.004); for(let t=1500;t<10000;t+=16)assert(!d.feed(.004+Math.sin(t)*.001,t)); });
 test('Sustained ringing is counted once, fresh attack counts again', () => { const d=new StrumDetector(); let hits=0; for(let t=0;t<2500;t+=16){ let rms=t<160?.001:t<1200?.12*Math.exp(-(t-160)/700):t<1400?.002:.12*Math.exp(-(t-1400)/700); if(d.feed(rms,t))hits++; } assert(hits===2,'got '+hits); });
+test('Repeated strums count while the previous chord is still loud', () => {
+  for(const step of [8,16,33]) for(const interval of [320,480,800]) {
+    const d=new StrumDetector(100); let hits=0;
+    for(let t=0;t<interval*5;t+=step){
+      // The tail never falls below 55% of the attack peak.
+      const rms=t%interval<64?.06:.04;
+      if(d.feed(rms,t))hits++;
+    }
+    assert(hits===5,`expected 5 overlapping attacks, got ${hits} at ${step} ms frames / ${interval} ms strums`);
+  }
+});
+test('Ringing with small volume fluctuations is counted once', () => {
+  const d=new StrumDetector(100); let hits=0;
+  for(let t=0;t<3000;t+=16){
+    const rms=.06*Math.exp(-t/5000)*(1+.1*Math.sin(t/60));
+    if(d.feed(rms,t))hits++;
+  }
+  assert(hits===1,'got '+hits);
+});
+test('One prolonged rising attack is not counted repeatedly', () => {
+  const d=new StrumDetector(100); let hits=0;
+  for(let t=0;t<640;t+=16) if(d.feed(.012*Math.pow(1.09,t/16),t))hits++;
+  assert(hits===1,'got '+hits);
+});
 test('Attack cooldown rejects a double hit within 230 ms', () => { const d=new StrumDetector(); assert(d.feed(.12,0)); for(let t=16;t<100;t+=16)d.feed(.001,t); assert(!d.feed(.12,100)); for(let t=116;t<300;t+=16)d.feed(.001,t); assert(d.feed(.12,300)); });
 test('Sensitivity catches softer attacks', () => { assert(!new StrumDetector(1).feed(.015,0)); assert(new StrumDetector(100).feed(.015,0)); });
 test('Chord pair grouping ignores order', () => assert(pairKey('A','D')===pairKey('D','A')));

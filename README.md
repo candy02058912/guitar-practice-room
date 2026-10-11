@@ -53,7 +53,7 @@ Open http://localhost:8000 in a current Chrome, Firefox, Edge or Safari browser.
 ## Behaviour
 
 - Audio is processed locally with Web Audio and is never recorded or sent to a server.
-- The detector finds amplitude attacks with a noise floor, decay gate and 230 ms cooldown. It estimates strums, not chord identities or correctness. Speech, taps and other sounds can count; ringing, soft or very fast strums can be missed. Adjust sensitivity and correct the final result.
+- The detector finds amplitude attacks with a noise floor, a 64 ms settling period and a 230 ms cooldown. A fresh attack can count while the previous chord is still ringing; the sound does not have to fade to near silence. It estimates strums, not chord identities or correctness. Speech, taps and other sounds can count; ringing, soft or very fast strums can be missed. Adjust sensitivity and correct the final result.
 - Manual mode starts on your first tap or Space press and counts each subsequent tap.
 - Switching tabs or hiding the page cancels the round to avoid silently missing changes.
 - The mic stops when the round finishes, is cancelled, or the page closes. Microphone mode plays a short end tone when audio is available.
