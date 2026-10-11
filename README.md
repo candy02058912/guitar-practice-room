@@ -53,7 +53,7 @@ Open http://localhost:8000 in a current Chrome, Firefox, Edge or Safari browser.
 ## Behaviour
 
 - Audio is processed locally with Web Audio and is never recorded or sent to a server.
-- The detector finds amplitude attacks with a noise floor, a 64 ms settling period and a 230 ms cooldown. A fresh attack can count while the previous chord is still ringing; the sound does not have to fade to near silence. It estimates strums, not chord identities or correctness. Speech, taps and other sounds can count; ringing, soft or very fast strums can be missed. Adjust sensitivity and correct the final result.
+- The detector combines volume attacks with new energy across frequency bands, using a calibrated noise floor and a shared 230 ms cooldown. The volume path re-arms after 64 ms of settling; a spectral attack can count even when a loud open string prevents that settling or masks the volume increase. A 2048-sample analysis window reduces low-string fluctuations, and volume smoothing uses elapsed time rather than frame count. Input boost applies equally to both paths and their calibration. It estimates strums, not chord identities or correctness. Speech, taps and other sounds can count; ringing, soft or very fast strums can be missed. Adjust sensitivity and correct the final result.
 - Manual mode starts on your first tap or Space press and counts each subsequent tap.
 - Switching tabs or hiding the page cancels the round to avoid silently missing changes.
 - The mic stops when the round finishes, is cancelled, or the page closes. Microphone mode plays a short end tone when audio is available.
@@ -62,7 +62,7 @@ Open http://localhost:8000 in a current Chrome, Firefox, Edge or Safari browser.
 
 ## Checks
 
-Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-input.html` for USB selection, preview and disconnect handling. Open `/tests-metronome.html` for timing, audio rendering, lifecycle and metronome interaction checks. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
+Run `python3 scripts/check-browser.py` with Chrome or Chromium installed to run all checks in an isolated browser profile. Alternatively, serve the project and open `/tests.html` to run deterministic checks for attack detection, the timer boundary, and record validation. Open `/tests-input.html` for USB selection, preview, +8 dB spectral counting and disconnect handling. Open `/tests-audio.html` for generated ringing-string PCM processed through the browser’s real FFT at different sample rates and frame intervals. Open `/tests-metronome.html` for timing, audio rendering, lifecycle and metronome interaction checks. Open `/tests-ui.html` in a separate test browser profile for integration checks of manual and microphone flows, saving, errors, cancellation and responsive overflow. The integration harness temporarily replaces browser storage and restores it after completion. These synthetic tests do not substitute for testing with a real guitar and microphone.
 
 ## Tailnet access
 

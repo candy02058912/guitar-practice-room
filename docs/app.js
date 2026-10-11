@@ -1,8 +1,8 @@
-import { StrumDetector, PracticeRound, pairKey, validSession } from './engine.js?v=2';
+import { StrumDetector, guitarBands, PracticeRound, pairKey, validSession } from './engine.js?v=3';
 const $ = id => document.getElementById(id);
 const chords = ['A', 'D', 'E', 'Am', 'Dm', 'Em', 'C', 'G', 'F', 'Bm', 'B7', 'A7', 'D7', 'E7', 'G7', 'C7', 'Fmaj7'];
 const storageKey = 'practice-room.sessions.v1';
-let sessions = [], state = 'idle', mode = 'mic', round, detector, stream, context, analyser, samples, frame, timeout, requestId = 0, calibrationEnd, wakeLock;
+let sessions = [], state = 'idle', mode = 'mic', round, detector, stream, context, analyser, samples, frequencies, bands, frame, timeout, requestId = 0, calibrationEnd, wakeLock;
 let storageWarning = '';
 try {
   const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -90,14 +90,16 @@ function tick() {
     // Boost the measured envelope, not audio playback. Calibration uses the same scale.
     const boost = 10 ** (Number($('input-boost').value) / 20);
     const rms = Math.sqrt(sum / samples.length) * boost;
+    analyser.getFloatFrequencyData(frequencies);
+    guitarBands(frequencies, context.sampleRate, boost, bands);
     $('level').value = rms;
     $('input-signal').textContent = peak >= 0.98 ? 'Too loud — lower device input gain' : peak * boost >= 0.98 ? 'Boost too high — reduce input boost' : rms >= 0.005 ? 'Signal detected' : 'Very quiet';
     if (state === 'calibrating') {
-      detector.calibrate(rms);
+      detector.calibrate(rms, bands);
       if (now >= calibrationEnd) {
         state = 'armed'; setStatus('Listening for your first strum', 'Take your time. The clock starts when you play.'); updateControls();
       }
-    } else if (state !== 'checking' && detector.feed(rms, now)) registerHit(now);
+    } else if (state !== 'checking' && detector.feed(rms, now, bands)) registerHit(now);
   }
   if (state === 'running') {
     const remaining = round.remaining(now), seconds = Math.ceil(remaining / 1000);
@@ -129,8 +131,9 @@ async function listen(preview = false) {
     $('input-status').textContent = `Listening to: ${stream.getTracks()[0]?.label || $('audio-input').selectedOptions[0].textContent}`;
     void refreshInputs();
     for (const track of stream.getTracks()) track.onended = () => interrupt('The audio input disconnected. Reconnect it, refresh devices, and check the input before starting again.');
-    analyser = context.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0;
+    analyser = context.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0;
     context.createMediaStreamSource(stream).connect(analyser);
+    frequencies = new Float32Array(analyser.frequencyBinCount); bands = new Float32Array(16);
     samples = new Float32Array(analyser.fftSize); detector = new StrumDetector(Number($('sensitivity').value)); round = new PracticeRound();
     state = preview ? 'checking' : 'calibrating'; calibrationEnd = performance.now() + 1500;
     if (preview) setStatus('Check your input', 'Strum a chord and watch the input level. The timer will not start.');

@@ -31,6 +31,35 @@ test('One prolonged rising attack is not counted repeatedly', () => {
   for(let t=0;t<640;t+=16) if(d.feed(.012*Math.pow(1.09,t/16),t))hits++;
   assert(hits===1,'got '+hits);
 });
+test('New chord harmonics count beneath a louder ringing open string', () => {
+  const d=new StrumDetector(100); let hits=0;
+  for(let t=0;t<1440;t+=16){
+    const bands=new Float32Array(16); bands[1]=.04;
+    // A strong open string persists. Softer chord attacks add upper harmonics,
+    // while total level rises less than the amplitude detector requires.
+    const age=t%480;
+    for(const bin of [5,8,11]) bands[bin]=.006*Math.exp(-age/100);
+    if(d.feed(.04+ .002*Math.exp(-age/100),t,bands))hits++;
+  }
+  assert(hits===3,'expected 3 attacks beneath the ringing string, got '+hits);
+});
+test('Spectral calibration rejects changing background noise', () => {
+  const d=new StrumDetector(100), bands=new Float32Array(16).fill(.01);
+  for(let i=0;i<100;i++)d.calibrate(.001,bands);
+  assert(d.feed(.02,0,bands));
+  for(let t=16;t<3000;t+=16){
+    bands.fill(t%480<64?.012:.006);
+    assert(!d.feed(.02,t,bands),'background variation counted');
+  }
+});
+test('Spectral and volume attacks share a cooldown and count only once', () => {
+  const d=new StrumDetector(100), bands=new Float32Array(16).fill(.01);
+  assert(d.feed(.05,0,bands));bands.fill(0);
+  for(let t=16;t<160;t+=16)d.feed(.05,t,bands);
+  bands.fill(.01);assert(!d.feed(.05,160,bands),'extra string attack counted');
+  bands.fill(0);for(let t=176;t<480;t+=16)d.feed(.05,t,bands);
+  bands.fill(.01);assert(d.feed(.05,480,bands),'fresh spectral attack missed');
+});
 test('Attack cooldown rejects a double hit within 230 ms', () => { const d=new StrumDetector(); assert(d.feed(.12,0)); for(let t=16;t<100;t+=16)d.feed(.001,t); assert(!d.feed(.12,100)); for(let t=116;t<300;t+=16)d.feed(.001,t); assert(d.feed(.12,300)); });
 test('Sensitivity catches softer attacks', () => { assert(!new StrumDetector(1).feed(.015,0)); assert(new StrumDetector(100).feed(.015,0)); });
 test('Chord pair grouping ignores order', () => assert(pairKey('A','D')===pairKey('D','A')));

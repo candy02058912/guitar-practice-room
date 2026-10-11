@@ -10,10 +10,11 @@ function assert(value,message='assertion failed'){if(!value)throw new Error(mess
 async function test(name,run){try{await run();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
 await new Promise(resolve=>{frame.onload=resolve;frame.src='./?inputs=test'});
 const w=frame.contentWindow,d=w.document,$=id=>d.getElementById(id);
+let spectrumPeaks=[];
 let now=0,amplitude=.001,nextFrame,tracks=[],requests=[],devices=[{kind:'audioinput',deviceId:'mic',label:'Built-in microphone'},{kind:'audioinput',deviceId:'usb',label:'Mustang Micro Plus'},{kind:'audiooutput',deviceId:'speaker',label:'Speakers'}];
 Object.defineProperty(w.performance,'now',{value:()=>now});
 w.requestAnimationFrame=cb=>{nextFrame=cb;return 1};w.cancelAnimationFrame=()=>{nextFrame=null};
-Object.defineProperty(w,'AudioContext',{value:class{state='running';resume(){return Promise.resolve()}close(){return Promise.resolve()}createAnalyser(){return{fftSize:1024,getFloatTimeDomainData:buffer=>buffer.fill(amplitude)}}createMediaStreamSource(){return{connect(){}}}}});
+Object.defineProperty(w,'AudioContext',{value:class{state='running';sampleRate=48000;resume(){return Promise.resolve()}close(){return Promise.resolve()}createAnalyser(){return{fftSize:1024,get frequencyBinCount(){return this.fftSize/2},getFloatFrequencyData:buffer=>{buffer.fill(-Infinity);for(const [bin,level] of spectrumPeaks)buffer[bin]=20*Math.log10(level)},getFloatTimeDomainData:buffer=>buffer.fill(amplitude)}}createMediaStreamSource(){return{connect(){}}}}});
 Object.defineProperty(w.navigator.mediaDevices,'enumerateDevices',{configurable:true,value:()=>Promise.resolve(devices)});
 function makeStream(label='Mustang Micro Plus'){const track={label,stopped:false,stop(){this.stopped=true}};tracks.push(track);return{getTracks:()=>[track]}}
 Object.defineProperty(w.navigator.mediaDevices,'getUserMedia',{configurable:true,value:options=>{requests.push(options);return Promise.resolve(makeStream(options.audio.deviceId?.exact==='mic'?'Built-in microphone':'Mustang Micro Plus'))}});
@@ -50,6 +51,18 @@ await test('Quick USB strums count over an audible boosted chord tail',()=>{
  for(let i=0;i<30;i++){now+=16;amplitude=.0008;nextFrame()}
  assert($('count').textContent==='2','tail must not add a strum');
  amplitude=.0012;now+=16;nextFrame();assert($('count').textContent==='3','overlapping quiet USB strum must count');
+});
+await test('At +8 dB a ringing string cannot mask a fresh spectral attack',async()=>{
+ $('cancel').click();$('input-boost').value='8';$('input-boost').dispatchEvent(new w.Event('input'));
+ amplitude=.00001;$('listen').click();await wait(20);
+ for(let i=0;i<100;i++){now+=16;nextFrame()}
+ amplitude=.02;spectrumPeaks=[[4,.02]];now+=16;nextFrame();assert($('count').textContent==='1');
+ for(let i=0;i<30;i++){now+=16;nextFrame()}
+ assert($('count').textContent==='1','ringing string alone counted again');
+ spectrumPeaks=[[4,.02],[14,.004],[24,.004],[42,.004]];now+=16;nextFrame();
+ assert($('count').textContent==='2','new frequencies at unchanged total volume must count');
+ for(let i=0;i<30;i++){now+=16;nextFrame()}
+ assert($('count').textContent==='2','sustained chord counted again');spectrumPeaks=[];
 });
 await test('Disconnecting USB stops the round and never opens another device',()=>{
  const count=requests.length,active=tracks.at(-1);active.onended();assert(active.stopped);assert(!$('error').hidden&&$('error').textContent.includes('disconnected'));assert(requests.length===count);assert(!$('audio-input').disabled&&$('count').textContent==='0');

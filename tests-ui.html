@@ -29,7 +29,7 @@ d.querySelector('.swap').click();assert($('session-total').textContent==='1 sess
 log.push('PASS Saved history persists after reload and reversing pair');
 $('manual').click();assert(d.querySelector('.swap').disabled,'swap disabled during round');d.querySelector('.swap').click();assert($('chord-a').value==='D','active pair unchanged');$('cancel').click();assert(!d.querySelector('.swap').disabled,'swap enabled after cancel');assert(!$('listen').hidden,'cancel restores controls');assert($('count').textContent==='0','cancel clears count');
 log.push('PASS Cancel restores ready state');
-Object.defineProperty(w,'AudioContext',{value:class {state='running';resume(){return Promise.resolve()}close(){return Promise.resolve()}}});
+Object.defineProperty(w,'AudioContext',{value:class {state='running';sampleRate=48000;resume(){return Promise.resolve()}close(){return Promise.resolve()}}});
 Object.defineProperty(w.navigator.mediaDevices,'getUserMedia',{configurable:true,value:()=>Promise.reject(new DOMException('Denied','NotAllowedError'))});
 $('listen').click();await wait(30);assert(!$('error').hidden&&$('error').textContent.includes('blocked'),'permission error');assert(!$('manual').hidden,'manual fallback available');
 log.push('PASS Denied microphone gives recovery and manual fallback');
@@ -40,7 +40,7 @@ log.push('PASS Cancelling a pending mic request releases late-arriving stream');
 let now=0, amplitude=.001, nextFrame, micStopped=false;
 Object.defineProperty(w.performance,'now',{value:()=>now});
 w.requestAnimationFrame=cb=>{nextFrame=cb;return 1};w.cancelAnimationFrame=()=>{nextFrame=null};
-Object.defineProperty(w,'AudioContext',{value:class {state='running';resume(){return Promise.resolve()}close(){return Promise.resolve()}createAnalyser(){return {fftSize:1024,getFloatTimeDomainData:buffer=>buffer.fill(amplitude)}}createMediaStreamSource(){return {connect(){}}}}});
+Object.defineProperty(w,'AudioContext',{value:class {state='running';sampleRate=48000;resume(){return Promise.resolve()}close(){return Promise.resolve()}createAnalyser(){return {fftSize:1024,get frequencyBinCount(){return this.fftSize/2},getFloatFrequencyData:buffer=>buffer.fill(-Infinity),getFloatTimeDomainData:buffer=>buffer.fill(amplitude)}}createMediaStreamSource(){return {connect(){}}}}});
 Object.defineProperty(w.navigator.mediaDevices,'getUserMedia',{configurable:true,value:()=>Promise.resolve({getTracks:()=>[{stop:()=>{micStopped=true}}]})});
 $('listen').click();await wait(20);assert($('status').textContent.includes('quiet'),'calibration starts');
 now=1600;nextFrame();assert($('status').textContent.includes('first strum'),'armed after calibration');assert($('timer').textContent==='1:00'&&$('count').textContent==='0','silence does not start');

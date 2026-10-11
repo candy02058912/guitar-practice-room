@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Audio onset checks</title><body><pre id="results">Running…</pre><script type="module">
+import { StrumDetector, guitarBands } from './engine.js';
+const results=[];
+// Keep virtual time yielding while the offline render thread reaches each suspension.
+const keepAlive=setInterval(()=>{},1);
+function assert(value,message='assertion failed'){if(!value)throw new Error(message)}
+async function test(name,run){try{await run();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
+// Render actual PCM through Web Audio's FFT, including phase/window movement.
+async function countAudio({rate=48000,step=.016,strums=true,boost=8}={}) {
+ const duration=2.8, audio=new OfflineAudioContext(1,Math.ceil(rate*duration),rate);
+ const buffer=audio.createBuffer(1,Math.ceil(rate*duration),rate), data=buffer.getChannelData(0);
+ for(let i=0;i<data.length;i++){
+  const t=i/rate, age=t-.2;if(age<0)continue;
+  // A long-lived low E plus its harmonics, with mild beating.
+  data[i]=.035*Math.exp(-age/5)*(1+.06*Math.sin(t*17))*Math.sin(2*Math.PI*82.41*t);
+  data[i]+=.007*Math.exp(-age/2)*Math.sin(2*Math.PI*164.82*t);
+  for(let chord=0;chord<(strums?5:1);chord++){
+   const a=age-chord*.48;if(a<0)continue;
+   const envelope=Math.min(a/.008,1)*Math.exp(-a/.12);
+   for(const hz of [329.63,554.37,987.77])data[i]+=.004*envelope*Math.sin(2*Math.PI*hz*t);
+  }
+ }
+ const source=audio.createBufferSource();source.buffer=buffer;
+ const analyser=audio.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;
+ source.connect(analyser);analyser.connect(audio.destination);source.start();
+ const samples=new Float32Array(analyser.fftSize),spectrum=new Float32Array(analyser.frequencyBinCount),bands=new Float32Array(16),d=new StrumDetector(100);
+ const gain=10**(boost/20),hits=[];
+ const observations=[];
+ for(let t=step;t<duration-step;t+=step){
+  const at=t;
+  observations.push(audio.suspend(at).then(()=>{
+   analyser.getFloatTimeDomainData(samples);analyser.getFloatFrequencyData(spectrum);
+   const rms=Math.sqrt(samples.reduce((sum,x)=>sum+x*x,0)/samples.length)*gain;
+   guitarBands(spectrum,rate,gain,bands);
+   if(at<.16)d.calibrate(rms,bands);else {
+    if(d.feed(rms,at*1000,bands))hits.push(at);
+   }
+   return audio.resume();
+  }));
+ }
+ await audio.startRendering();await Promise.all(observations);return hits;
+}
+await test('Actual FFT detects five softer strums beneath a ringing low E at +8 dB',async()=>{
+ const hits=await countAudio();assert(hits.length===5,'got '+hits.length+' at '+hits.join(', '));
+});
+await test('Actual FFT does not turn sustained harmonics and beating into extra strums',async()=>{
+ const hits=await countAudio({strums:false});assert(hits.length===1,'got '+hits.length+' at '+hits.join(', '));
+});
+await test('Ringing-string detection works at 44.1 kHz and 30 fps',async()=>{
+ const hits=await countAudio({rate:44100,step:1/30});assert(hits.length===5,'got '+hits.length+' at '+hits.join(', '));
+});
+clearInterval(keepAlive);
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></body></html>
