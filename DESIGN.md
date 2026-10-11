@@ -83,6 +83,20 @@ Panels have the larger radius; controls have the smaller radius. The swap button
 
 All IDs, inputs, event bindings and behavior remain unchanged. The primary action is purple with white text and a small upward hover movement. Reduced-motion preferences remove transitions. Focus is a three-pixel dark pink outline with four-pixel offset. Disabled controls reduce opacity. Settings, result correction, errors and populated history use the same palette and type system.
 
+### Fretboard staff answers
+
+The fretboard's Answer with selector retains note-name practice and adds placing a note on the staff. The answer surface appears during staff-answer rounds beneath the guitar-position prompt. It inherits the panel, rounded controls and purple action palette. Its responsive SVG occupies the available width at 290px height, with a 400 × 290 view box, a rounded border and a visible purple keyboard-focus outline. Ungraded noteheads use the primary purple. Click/tap and arrow placement share the same explicit staff and ledger geometry; an adjacent native select supplies accidentals. After grading, placement locks and the accidental/check controls disappear. A result panel above the staff uses Fredoka result text: Correct! on mint, Not quite on pink, or Answer revealed on lavender. Wrong answers remain visible as hollow plum-outlined notes on the left; filled green correct notes appear on the right, with Your answer and Correct note labels beneath. Correct answers preserve the accepted enharmonic spelling. Feedback scrolls into view while Enter continues the round.
+
+Bravura supplies only musical clef and accidental glyphs from the local OFL asset; Fredoka and DM Sans remain the interface fonts. The small 8 below the treble clef indicates sounding pitch one octave below written pitch. This is a narrow extension of the existing world. The older standalone staff page is directly accessible but omitted from main navigation.
+
+### Optional standalone staff reading
+
+The staff-reading tool inherits the shared navigation, practice panel, lavender prompt and tier navigator, mint reference, pink guitar guide, Fredoka headings and DM Sans controls. Self-hosted Bravura (`assets/bravura.otf`, with its local SIL Open Font License) supplies only the treble clef and accidental symbols; it is a musical notation asset, not a replacement brand typeface.
+
+The notation uses a responsive SVG with a 400 × 290 view box. Five staff lines are spaced 20 units apart; successive written letters move 10 units between lines and spaces. Ledger lines, noteheads and stems use explicit SVG geometry. Bravura symbols render at 80 units. A small DM Sans 8 below the clef indicates guitar's sounding pitch one octave below its written pitch; displayed fingerings and reference audio follow the sounding pitch.
+
+The staff fills the available width with a 300px maximum height, reduced to 250px at the shared 760px mobile breakpoint, where the workspace becomes one column. Typed answers retain the existing rounded controls and visible focus. The reference guide and note selector stay hidden during rounds; note names, guitar positions and audio become available after grading. Starting a round remains disabled until the local notation font loads.
+
 ## Do's and Don'ts
 
 - Keep practice controls readable and stable while adding visual personality around them.

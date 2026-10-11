@@ -5,8 +5,9 @@
   <meta name="theme-color" content="#fff9db">
   <title>Practice room · Fretboard</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="style.css?v=6"><link rel="stylesheet" href="fretboard.css?v=5">
-  <script type="module" src="fretboard.js?v=5"></script>
+  <link rel="stylesheet" href="style.css?v=6"><link rel="stylesheet" href="fretboard.css?v=6">
+  <link rel="stylesheet" href="staff-answer.css?v=2">
+  <script type="module" src="fretboard.js?v=8"></script>
 </head>
 <body>
   <header class="site-header"><a class="wordmark" href="./" aria-label="Practice room home"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 4v20M14 4v20M22 4v20M3 9h22M3 19h22"/><circle cx="14" cy="9" r="3"/><circle cx="6" cy="19" r="3"/></svg>practice room<span class="wordmark-dot">.</span></a><span class="header-note">A little practice, every day.</span></header>
@@ -23,7 +24,7 @@
         </div>
         <div class="fret-settings">
           <label for="scope">Practice level<select id="scope"></select></label>
-          <label for="practice-mode">Answer with<select id="practice-mode"><option value="screen">On-screen quiz</option><option value="guitar">My guitar · self-check</option></select></label>
+          <label for="practice-mode">Answer with<select id="practice-mode"><option value="screen">Note names · C D E</option><option value="staff">Place a note on the staff</option><option value="guitar">My guitar · self-check</option></select></label>
         </div>
         <div class="note-prompt"><h3 id="prompt">Start with C, D & E</h3><p id="prompt-help">Tap a labeled note to hear it. Then find it on your guitar.</p></div>
         <p class="board-caption" id="board-caption">B is the second-thinnest string. 0 means play it open.</p>
@@ -35,6 +36,8 @@
           <p id="typed-answer-help" class="small-copy">Type a fret number, then press Enter.</p>
           <p id="typed-answer-error" class="error" role="alert" hidden></p>
         </form>
+        <section id="staff-answer" class="staff-answer" aria-label="Answer on the staff" hidden></section>
+        <p id="notation-error" class="error" role="alert" hidden></p>
         <div id="note-answers" class="note-answers" aria-label="Choose a note name" hidden></div>
         <p id="feedback" class="fret-feedback" role="status" aria-live="polite">Learn the locations first. You can take as long as you like.</p>
         <p id="keyboard-help" class="small-copy">Keyboard: Tab to a control, then Enter to use it. Arrow keys move between fret positions and note choices.</p>

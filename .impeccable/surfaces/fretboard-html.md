@@ -2,7 +2,7 @@
 version: 1
 slug: "fretboard-html"
 primary_target: "fretboard.html"
-related_targets: ["fretboard.css","fretboard.js","fretboard-engine.js"]
+related_targets: ["fretboard.css","fretboard.js","fretboard-engine.js","staff-answer.js","staff-answer.css","staff-engine.js"]
 ---
 
 # Fretboard practice
@@ -24,3 +24,8 @@ Each tier has its own expandable summary and completion count. Level rows separa
 
 ## Keyboard practice
 Prefer familiar typed answers and Enter over memorized shortcuts. Auto-focus the answer field for each on-screen question, focus Next after grading, and repeat after results. Validate fret ranges and parse enharmonic note spellings. Preserve native form/select controls; arrow navigation within fret/note button groups has one Tab stop each.
+
+## Staff-answer extension
+The learner already reads notation: show a guitar string/fret position and ask them to place its pitch on the staff. Keep the existing C/D/E note-name answer mode beside this mode in the Answer with selector. Both use the same 24 levels with separate recall totals, selected level and completion; guitar self-check shares note-name progress.
+
+In a staff-answer round, place a note by tap/click or Up/Down arrows, choose an accidental and submit with Enter or Check staff answer. Grade exact sounding pitch and octave, accepting enharmonic spelling. Show the correct notation only after grading or reveal, with an explicit Correct!, Not quite or Answer revealed result above the staff. For wrong answers, preserve the hollow chosen note on the left beside the filled correct note on the right, with text labels. Retain accepted enharmonic spelling for correct answers. Hide answer controls after grading, bring staff feedback into view and preserve Enter to continue. Preserve the existing palette, type and panel layout; use local Bravura only for notation symbols. Written guitar pitches sit one octave above their sounding pitches. The older standalone staff-reading page remains directly accessible but is not in the main navigation.

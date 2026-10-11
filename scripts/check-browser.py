@@ -26,7 +26,7 @@ server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=s
 Thread(target=server.serve_forever, daemon=True).start()
 try:
     with TemporaryDirectory(prefix='guitar-browser-') as profile:
-        for page in ('tests.html', 'tests-audio.html', 'tests-ui.html', 'tests-metronome.html', 'tests-input.html', 'tests-fretboard.html'):
+        for page in ('tests.html', 'tests-audio.html', 'tests-ui.html', 'tests-metronome.html', 'tests-input.html', 'tests-fretboard.html', 'tests-staff.html', 'tests-staff-answer.html'):
             result = subprocess.run([
                 browser, '--headless', '--no-sandbox', '--disable-gpu',
                 f'--user-data-dir={profile}', '--dump-dom', f'--virtual-time-budget={60000 if page == "tests-audio.html" else 5000}',

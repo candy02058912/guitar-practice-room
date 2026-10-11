@@ -138,6 +138,17 @@ try{
   assert(frame.contentDocument.getElementById('path-count').textContent==='1 / 24 complete');
  });
  await test('Recall progress survives reload',async()=>{await load();assert(frame.contentDocument.getElementById('progress').textContent.includes('unassisted recalls'))});
+ await test('Level 12 distinguishes both B octaves in the main prompt and grades their exact frets',async()=>{
+  for (const [fret,word] of [[0,'lower'],[12,'higher']]) {
+   const hits=Object.fromEntries(locations('b').map(p=>[p.id,p.fret===fret?0:2]));
+   localStorage.setItem(LEVEL_KEY,JSON.stringify({selected:'b',levels:{b:{hits,complete:false}}}));
+   await load();const doc=frame.contentDocument,get=id=>doc.getElementById(id);
+   get('start').click();assert(get('prompt').textContent===`Find the ${word} B on the B string`);
+   assert(get('prompt-help').textContent.includes('an octave apart'));
+   get('typed-answer').value=String(fret);get('typed-answer-form').requestSubmit();
+   assert(get('feedback').textContent.startsWith('Yes!'));
+  }
+ });
 }finally{if(levelBackup===null)localStorage.removeItem(LEVEL_KEY);else localStorage.setItem(LEVEL_KEY,levelBackup);if(backup===null)localStorage.removeItem(key);else localStorage.setItem(key,backup)}
 document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
 </script></body></html>

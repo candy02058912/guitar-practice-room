@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Staff checks</title><pre id="results">Running…</pre><iframe id="app" title="Staff tool under test" width="1100" height="1800"></iframe><script type="module">
+import {note,geometry,describe,matches,parseAnswer,guitarLocations,LEVELS,STAFF_KEY,readState,progress,credit,completeLevel,pick} from './staff-engine.js';
+const results=[];function assert(value,message='assertion failed'){if(!value)throw Error(message)}
+async function test(name,run){try{await run();results.push('PASS '+name)}catch(e){results.push('FAIL '+name+': '+e.message)}}
+await test('Treble lines, spaces and ledger lines use written pitches',()=>{
+ assert(geometry(note('E4')).y===160);assert(geometry(note('F4')).y===150);assert(geometry(note('F5')).y===80);
+ assert(geometry(note('C4')).ledger.join()==='180');assert(geometry(note('D4')).ledger.length===0);
+ assert(geometry(note('E3')).ledger.join()==='180,200,220');assert(geometry(note('A5')).ledger.join()==='60');
+ assert(geometry(note('B4')).stemDown);assert(!geometry(note('A4')).stemDown);
+ assert(describe(note('C5')).startsWith('space 3'));
+});
+await test('Guitar mappings transpose exactly one octave and match familiar notes',()=>{
+ assert(note('C5').writtenMidi===72&&note('C5').midi===60);
+ assert(guitarLocations(note('C5')).some(p=>p.string==='B'&&p.fret===1));
+ assert(guitarLocations(note('E3')).some(p=>p.string==='low E'&&p.fret===0));
+ assert(guitarLocations(note('E5')).some(p=>p.string==='high E'&&p.fret===0));
+ for(const level of LEVELS)for(const n of level.notes)assert(guitarLocations(n).length>0,n.id+' unplayable');
+});
+await test('Staff answers require the written spelling, with optional written octave',()=>{
+ assert(matches('c#',note('C#5')));assert(matches('C♯5',note('C#5')));assert(matches('db',note('Db5')));
+ assert(!matches('Db',note('C#5')));assert(!matches('C#4',note('C#5')));assert(!parseAnswer('hello'));assert(!parseAnswer('H'));
+ assert(note('C#5').midi===note('Db5').midi&&geometry(note('C#5')).y!==geometry(note('Db5')).y);
+});
+await test('Independent staff progress validates storage and requires every spelling twice',()=>{
+ const state=readState({getItem:()=>'{broken'});assert(state.selected==='familiar');
+ for(const l of LEVELS){for(const n of l.notes)credit(state,l,n);assert(!completeLevel(state,l));for(const n of l.notes)credit(state,l,n);assert(completeLevel(state,l));assert(!completeLevel(state,l));}
+ const clean=readState({getItem:()=>JSON.stringify({selected:'bad',levels:{familiar:{complete:true,hits:{C5:'2',D5:-1,E5:2}}}})});
+ assert(!progress(clean,LEVELS[0]).complete&&progress(clean,LEVELS[0]).earned===2);
+ assert(pick(clean,LEVELS[0],null,()=>0).id!=='E5');
+});
+const frame=document.getElementById('app'),backup=localStorage.getItem(STAFF_KEY),fretKey='practice-room.fretboard.levels.v1',fretBackup=localStorage.getItem(fretKey);
+const load=()=>new Promise(resolve=>{frame.onload=async()=>{await frame.contentDocument.fonts.ready;for(let i=0;i<100&&frame.contentDocument.getElementById('start').disabled;i++)await new Promise(r=>setTimeout(r,20));resolve()};frame.src='./staff.html?test='+Date.now()});
+try{
+ localStorage.removeItem(STAFF_KEY);await load();const d=frame.contentDocument,$=id=>d.getElementById(id),click=id=>$(id).click();
+ function rendered(){const l=LEVELS.find(l=>l.id===$('scope').value),y=Number(d.querySelector('.note-head').getAttribute('cy'));const symbols=[...d.querySelectorAll('.music-symbol')].map(e=>e.textContent);const acc=symbols.includes('\uE262')?'#':symbols.includes('\uE260')?'b':'';return l.notes.find(n=>geometry(n).y===y&&n.accidental===acc)}
+ function correct(){const n=rendered();$('answer').value=n.name;$('answer-form').requestSubmit()}
+ await test('Notation font loads and familiar note points to B-string fret 1',()=>{assert(!$('start').disabled);assert(d.fonts.check('80px Bravura'));assert($('guitar-bridge').textContent.includes('B string, fret 1'));assert($('scope').options.length===12)});
+ await test('Quiz hides reference answers and focuses typed entry',()=>{click('start');assert(d.activeElement===$('answer'));assert($('reference').hidden&&$('explore-notes').hidden&&$('listen').hidden);assert(!$('staff').getAttribute('aria-label').includes('Written'));assert(!$('guitar-bridge').textContent.includes('fret'));});
+ await test('Invalid input does not count; hints do not earn recalls',()=>{$('answer').value='wrong';$('answer-form').requestSubmit();assert(!$('answer-error').hidden&&$('next').hidden);click('reveal');assert($('feedback').textContent.includes('With help'));assert(!$('listen').hidden);assert($('level-meter').value===0);});
+ await test('Keyboard answer flow grades once and ends at results',()=>{
+ for(let i=0;i<5;i++){click('next');assert(d.activeElement===$('answer')&&$('answer').value==='');correct();const before=$('level-meter').value;$('answer-form').requestSubmit();assert($('level-meter').value===before);assert(d.activeElement===$('next'));}
+ click('next');assert($('prompt').textContent==='5 of 6 read without help');assert(d.activeElement===$('start'));
+ });
+ await test('Repeated practice completes the level and exposes advancement',()=>{click('start');for(let i=0;i<6;i++){correct();click('next')}assert(!$('level-celebration').hidden&&!$('advance').hidden);assert($('path-count').textContent==='1 / 12 complete');click('advance');assert($('scope').value==='lower-lines');});
+ await test('Sharp and flat quizzes retain visible accidentals and exact spelling',()=>{
+ $('scope').value='sharps';$('scope').dispatchEvent(new Event('change'));click('start');assert(d.querySelectorAll('.music-symbol').length===2);correct();assert($('feedback').textContent.startsWith('Yes!'));click('explore');
+ $('scope').value='flats';$('scope').dispatchEvent(new Event('change'));click('start');assert(rendered().accidental==='b');correct();assert($('feedback').textContent.startsWith('Yes!'));click('explore');
+ });
+ await test('Staff tool fits a narrow phone without horizontal overflow',async()=>{frame.width='360';await new Promise(r=>setTimeout(r,100));assert(d.documentElement.scrollWidth<=frame.contentWindow.innerWidth)});
+ await test('Selection and completion survive reload without changing fretboard data',async()=>{await load();assert(frame.contentDocument.getElementById('scope').value==='flats');assert(frame.contentDocument.getElementById('path-count').textContent==='1 / 12 complete');assert(localStorage.getItem(fretKey)===fretBackup)});
+}finally{if(backup===null)localStorage.removeItem(STAFF_KEY);else localStorage.setItem(STAFF_KEY,backup)}
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(r=>r.startsWith('FAIL'))?'FAIL':'PASS';
+</script></html>

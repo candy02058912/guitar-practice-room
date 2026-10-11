@@ -1,6 +1,6 @@
 # Practice room
 
-A small, dependency-free guitar practice toolbox with a one-minute chord-change timer, a metronome, and fretboard practice. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
+A small, dependency-free guitar practice toolbox with a one-minute chord-change timer, a metronome and fretboard practice with note-name or staff answers. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
 
 ## USB guitar input (including Mustang Micro Plus)
 
@@ -26,7 +26,7 @@ The diagram includes a position-marker strip matching the Player II Telecaster t
 
 Open `fretboard.html` or choose **Fretboard** in the tool navigation. Start by exploring C, D and E on the B string: frets 1, 3 and 5. Tap a labeled note to hear a synthesized reference tone, then find it on your guitar.
 
-Choose **Try 6 questions** for alternating note-location and note-name questions. Show answer counts as practice with help; an incorrect answer shows the correct location. In **My guitar · self-check**, play the requested note before revealing its location, then choose I knew it or Still learning. This mode uses your judgment, not microphone recognition. Quiz answers are hidden from the reference guide until the round ends.
+With **Answer with → Note names · C D E**, choose **Try 6 questions** for alternating note-location and note-name questions. Show answer counts as practice with help; an incorrect answer shows the correct location. In **My guitar · self-check**, play the requested note before revealing its location, then choose I knew it or Still learning. This mode uses your judgment, not microphone recognition. Quiz answers are hidden from the reference guide until the round ends.
 
 Questions prioritize locations with fewer earned recalls; within that group, locations are covered before repeating and previous misses have higher selection weight. Recall counts are saved locally, separately from the other tools. The level selector offers 24 levels in four tiers: First notes, Connect strings, Learn the neck, and Sharps & flats. Each level tracks two successful recalls per location; completing a round after reaching that goal earns a permanent completion mark. Hints and wrong answers do not add progress, while guitar self-checks do. Questions prioritize locations with fewer earned recalls. You can revisit or jump ahead freely; the selected level and completion marks survive reloads. Earlier recall totals are preserved separately and do not imply level completion. Standard tuning only. Sharp/flat equivalents share an answer, and open-string and twelfth-fret prompts specify which location to use so both locations receive practice.
 
@@ -34,11 +34,29 @@ Each round ends with recall results and actions to repeat, explore, or advance a
 
 `tests-fretboard.html` checks pitch mapping, practice scopes, adaptive selection, storage validation, quiz and self-check scoring, result actions, tier navigation, selected-row hover, persistence and mobile overflow.
 
+### Answer on the staff
+
+Choose **Answer with → Place a note on the staff** to turn a shown guitar string/fret position into written guitar notation. This is for connecting a familiar fretboard or tab position to the staff. Click or tap a line or space, or use Up/Down arrows, choose Natural, Sharp or Flat, and press Enter or **Check staff answer**. Feedback above the staff says **Correct!**, **Not quite** or **Answer revealed**. After a wrong answer, your hollow note stays on the left beside the filled correct note on the right, each labeled. Correct answers retain your accepted sharp/flat spelling. Grading hides the accidental and check controls and brings the staff feedback into view; Enter continues. Show answer reveals the correct note without earning a recall. The answer must match the exact sounding pitch, including octave; equivalent sharp/flat spellings are accepted. Guitar notation is written one octave above its sounding pitch: B-string fret 1 is written C5 and sounds C4.
+
+Staff answers use the same 24 levels and six-question rounds as note-name answers, with separate recall totals, level completion and selected level. Guitar self-check shares the note-name progress. Switch answer modes outside a round. Notation uses a local Bravura font; if it fails to load, note-name practice remains available. `tests-staff-answer.html` checks staff placement and the fretboard integration.
+
 ### Keyboard practice
 
-Start a round with Tab and Enter. The answer field receives focus automatically: type a fret number (0–12 within the selected area) or a note name such as C, C# or Db, then press Enter. Fret answers apply to the string named in the question. Invalid input asks for correction without counting an attempt. After feedback, Enter continues; after results, Enter repeats the round. Tab reaches hints, next-level controls and other options.
+In note-name mode, start a round with Tab and Enter. The answer field receives focus automatically: type a fret number (0–12 within the selected area) or a note name such as C, C# or Db, then press Enter. Fret answers apply to the string named in the question. Invalid input asks for correction without counting an attempt. After feedback, Enter continues; after results, Enter repeats the round. Tab reaches hints, next-level controls and other options.
 
 The fretboard and note-choice buttons each occupy one Tab stop. Arrow keys move across frets/between strings or through note choices, and Enter/Space activates the focused button. Home/End go to the first/last available fret on a string or note option. Selects and tier summaries retain normal keyboard behavior. In guitar self-check mode, Enter reveals the answer; Tab chooses I knew it or Still learning and Enter confirms. Holding Enter does not submit repeated answers.
+
+## Optional standalone staff reading
+
+The earlier `staff.html` page remains accessible directly; it is not in the main tool navigation. It is separate from the fretboard staff-answer mode above. Explore a written note, then complete six-question rounds by typing its name and pressing Enter. Enter after feedback continues. Twelve levels cover familiar C/D/E, treble lines and spaces, ledger lines, open strings, sharps, flats and a mixed written E3–A5 range. Levels are freely selectable; two correct recalls per written note complete a level at the end of a round. Staff progress and selected level are saved separately from fretboard progress.
+
+Answers name the written spelling: C# and Db sound alike, but are different answers on the staff. Use `#`/`b` or the musical symbols; an optional octave number refers to the written pitch. No octave number is required. Invalid input is not scored; revealing an answer earns no progress. Fingerings and audio are hidden until the question is answered. The reference guide and note selector stay hidden throughout the round.
+
+Guitar treble notation sounds one octave below the written pitch; the clef carries a small 8 below it. Written C5 maps to sounding C4, including B-string fret 1. After grading, the guide lists up to three matching positions through fret 12; Hear this note plays the sounding pitch with a synthesized tone. This is pitch reading, not rhythm or key-signature practice. Notation uses local Bravura glyphs with deterministic SVG staff/ledger geometry. If the font cannot load, the quiz remains disabled with a reload message.
+
+References: [Open Music Theory: reading clefs](https://viva.pressbooks.pub/openmusictheory/chapter/clefs/), [staff and ledger lines](https://www.musictheory.net/lessons/10). The self-hosted [Bravura font](https://github.com/steinbergmedia/bravura) is by Steinberg; its SIL Open Font License is in `assets/bravura-LICENSE.txt`.
+
+`tests-staff.html` verifies pitch geometry, ledger lines, guitar octave mapping, written spelling, progress, keyboard focus, answer concealment, responsive layout, persistence and isolation from fretboard progress.
 
 ## GitHub Pages
 

@@ -1,0 +1,21 @@
+@font-face { font-family: 'Bravura'; src: url('assets/bravura.otf') format('opentype'); font-display: block; }
+.staff-panel { padding-bottom: 24px; }
+.staff-settings { grid-template-columns: 1fr; }
+.staff-stage { background: var(--surface); }
+#staff { width: 100%; max-height: 300px; display: block; color: var(--ink); }
+#staff .music-symbol { font-family: 'Bravura'; font-size: 80px; fill: currentColor; }
+#staff .staff-line { stroke: var(--muted); stroke-width: 1.4; }
+#staff .ledger-line { stroke: var(--ink); stroke-width: 1.8; }
+#staff .note-stem { stroke: var(--ink); stroke-width: 2; }
+#staff .note-head { fill: var(--ink); }
+#staff .octave-mark { font: 14px 'DM Sans', sans-serif; fill: var(--ink); }
+.staff-caption { min-height: 24px; text-align: center; color: var(--green); font-weight: 700; font-size: 15px; margin: 0 0 16px; }
+.staff-reference p { color: #43674e; font-size: 14px; line-height: 1.75; }
+#answer { width: 150px; min-width: 0; min-height: 52px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font: inherit; font-size: 18px; color: var(--ink); background: var(--surface); }
+#answer[aria-invalid=true] { border-color: var(--orange); }
+#answer-error { margin-top: 12px; }
+#explore-notes { max-height: 190px; overflow-y: auto; padding: 5px; }
+#explore-notes button[aria-pressed=true] { background: var(--green); color: var(--surface); }
+#explore-notes button[aria-pressed=true]:hover { background: var(--green-hover); }
+.practice-note a { color: var(--ink); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; }
+@media (max-width: 760px) { #staff { max-height: 250px; } }
