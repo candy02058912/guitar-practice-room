@@ -46,7 +46,7 @@ function updateControls() {
   document.body.classList.toggle('is-running', state === 'running');
   document.body.classList.toggle('is-armed', state === 'armed');
   if (same && state === 'idle') setStatus(t('Choose two different chords'), t('Pick a different second chord to start your practice.'));
-  else if (state === 'idle') setStatus(t('Make yourself comfortable'), t('Get your fingers ready. Your first strum starts the clock.'));
+  else if (state === 'idle') setStatus(t('Ready'), t('First strum starts the 60-second timer.'));
 }
 async function holdScreen() {
   try {
@@ -68,7 +68,7 @@ function reset(message) {
   $('timer').textContent = '1:00'; $('timer').setAttribute('aria-label', t('60 seconds remaining'));
   $('time-fill').style.transform = 'scaleX(1)'; $('count').textContent = '0';
   $('count-label').textContent = t('estimated changes');
-  updateControls(); if (message) setStatus(message, t('Your next minute is ready when you are.'));
+  updateControls(); if (message) setStatus(message, '');
 }
 function interrupt(message) { reset(); showError(message); }
 function registerHit(now) {
@@ -76,7 +76,7 @@ function registerHit(now) {
   if (round.expired(now)) { finish(); return; }
   if (state === 'armed') {
     state = 'running';
-    setStatus(t('Keep going. You’ve got this.'), mode === 'mic' ? t('Alternate your chords. One strum for each change.') : t('Press Space or tap the button for each chord you play.'));
+    setStatus(t('Counting'), mode === 'mic' ? t('Strum once per chord.') : t('Space or tap to count a change.'));
     timeout = setTimeout(finish, 60000);
     updateControls();
   }
@@ -99,7 +99,7 @@ function tick() {
     if (state === 'calibrating') {
       detector.calibrate(rms, bands);
       if (now >= calibrationEnd) {
-        state = 'armed'; setStatus(t('Listening for your first strum'), t('Take your time. The clock starts when you play.')); updateControls();
+        state = 'armed'; setStatus(t('Waiting for first strum'), t('First strum starts the timer.')); updateControls();
       }
     } else if (state !== 'checking' && detector.feed(rms, now, bands)) registerHit(now);
   }
@@ -115,7 +115,7 @@ async function listen(preview = false) {
   if (state === 'checking') reset();
   if (state !== 'idle') return;
   clearError(); mode = 'mic'; state = 'requesting'; const token = ++requestId;
-  setStatus(t('Allow audio input access'), t('Your browser may call this microphone permission, even for a USB guitar.')); updateControls();
+  setStatus(t('Allow audio input access'), t('Allow microphone access, including for USB audio.')); updateControls();
   let pendingContext;
   try {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('UNSUPPORTED');
@@ -138,14 +138,16 @@ async function listen(preview = false) {
     frequencies = new Float32Array(analyser.frequencyBinCount); bands = new Float32Array(16);
     samples = new Float32Array(analyser.fftSize); detector = new StrumDetector(Number($('sensitivity').value)); round = new PracticeRound();
     state = preview ? 'checking' : 'calibrating'; calibrationEnd = performance.now() + 1500;
-    if (preview) setStatus(t('Check your input'), t('Strum a chord and watch the input level. The timer will not start.'));
-    else setStatus(t('Finding the input’s quiet level…'), t('Hold off strumming for a moment.'));
+    if (preview) $('mic-settings').open = true;
+    if (preview) setStatus(t('Check your input'), t('Strum to test the level. Timer stays paused.'));
+    else setStatus(t('Finding the input’s quiet level…'), t('Stay quiet briefly.'));
     updateControls();
     context.onstatechange = () => { if (context && context.state === 'suspended' && ['checking', 'armed', 'running', 'calibrating'].includes(state)) interrupt(t('Audio was interrupted. Keep this page open and start a new round.')); };
     void holdScreen(); tick();
   } catch (error) {
     if (token !== requestId) return;
     reset();
+    $('mic-settings').open = true;
     const messages = { OverconstrainedError: t('The selected audio input is unavailable. Reconnect it or choose another input; the app has not switched to your microphone.'), NotAllowedError: t("Audio input access was blocked. Allow microphone permission in your browser’s site settings (also required for USB audio), or use manual mode."), NotFoundError: t('The audio input was not found. Connect your USB device with a data cable, refresh devices, or choose another input.'), NotReadableError: t('The audio input is unavailable. Close other apps using it and try again, or use manual mode.') };
     showError(messages[error.name] || t('Audio input is unavailable. Open this app on localhost or HTTPS in a supported browser, or use manual mode.'));
   }
@@ -154,7 +156,7 @@ function manual() {
   if (state !== 'idle') return;
   clearError(); mode = 'manual'; round = new PracticeRound(); state = 'armed';
   $('count-label').textContent = t('changes counted');
-  setStatus(t('Ready when you are'), t('Press Space or tap “Count a change” with your first chord.'));
+  setStatus(t('Ready to count'), t('Space or tap starts the timer and counts one change.'));
   updateControls(); $('tap').focus(); void holdScreen(); tick();
 }
 function finish() {
@@ -171,7 +173,7 @@ function finish() {
     } catch { /* The visible end state still signals completion. */ }
   }
   releaseAudio(); state = 'finished'; $('timer').textContent = '0:00'; $('timer').setAttribute('aria-label', t('Time is up')); $('time-fill').style.transform = 'scaleX(0)';
-  $('final-count').value = round.count; setStatus(t('Time’s up. Nice work.'), ''); updateControls(); $('final-count').focus();
+  $('final-count').value = round.count; setStatus(t('Finished'), ''); updateControls(); $('final-count').focus();
 }
 function renderHistory() {
   const [a, b] = selectedPair(), rows = sessions.filter(s => pairKey(...s.chords) === pairKey(a, b)).sort((a,b) => Date.parse(b.date)-Date.parse(a.date));
@@ -207,7 +209,7 @@ $('save').addEventListener('click', () => {
   const next = [...sessions, { id: crypto.randomUUID(), chords: selectedPair(), count, date: new Date().toISOString(), mode }];
   let saved = false;
   if (!storageWarning) { try { localStorage.setItem(storageKey, JSON.stringify(next)); saved = true; } catch { /* Keep session in memory for export. */ } }
-  sessions = next; clearError(); reset(saved ? t('Session saved. Keep showing up.') : t('Session added for this visit.')); renderHistory();
+  sessions = next; clearError(); reset(saved ? t('Session saved') : t('Saved for this visit only')); renderHistory();
   if (!saved) showError(storageWarning || t('Browser storage is unavailable or full. Download your practice log now to keep this result after closing the page.'));
 });
 $('export').addEventListener('click', () => {
@@ -234,8 +236,8 @@ async function refreshInputs() {
     }
     $('audio-input').replaceChildren(...options); $('audio-input').value = selected;
     $('input-help').textContent = devices.some(device => device.label)
-      ? t("For USB guitar, select your Mustang Micro Plus (or its USB audio name), then check the signal.")
-      : t('USB guitar or microphone. Check input to allow access and reveal device names.');
+      ? t("Select an input, then check the signal.")
+      : t('Check input to allow access and show devices.');
   } catch {
     $('input-help').textContent = t('Device list unavailable. Allow audio permission with Check input, then refresh devices.');
   }
@@ -251,7 +253,7 @@ $('audio-input').addEventListener('change', () => {
   const wasChecking = state === 'checking';
   clearError();
   if (wasChecking) { reset(); void listen(true); }
-  else $('input-status').textContent = t('Input selected. Use Check input to test it.');
+  else $('input-status').textContent = t('Input selected');
 });
 navigator.mediaDevices?.addEventListener?.('devicechange', () => { void refreshInputs(); });
 void refreshInputs();

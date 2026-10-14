@@ -1,9 +1,9 @@
 .fret-panel { padding-bottom: 24px; }
-.fret-settings { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; margin: 24px 0; }
+.fret-settings { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin: 16px 0; }
 .fret-settings label { font-size: 12px; font-weight: 700; color: var(--muted); }
 .fret-settings select { display: block; width: 100%; min-height: 46px; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--surface); }
-.note-prompt { padding: 23px 30px; margin: 0 -30px 22px; background: var(--tint); }
-.note-prompt h3 { font: 500 clamp(27px, 3vw, 36px)/1.2 'Fredoka', sans-serif; color: var(--primary); margin: 0 0 10px; text-wrap: balance; }
+.note-prompt { padding: 16px 24px; margin: 0 -24px 16px; background: var(--tint); }
+.note-prompt h3 { font: 500 24px/1.3 'Fredoka', sans-serif; color: var(--primary); margin: 0 0 10px; text-wrap: balance; }
 .note-prompt p { font-size: 14px; line-height: 1.6; color: var(--tone-tint-ink); margin: 0; }
 .board-caption, .small-copy { font-size: 12px; line-height: 1.65; color: var(--muted); }
 .board-scroll { overflow-x: auto; padding: 5px 5px 12px; scrollbar-color: var(--tone-control-line) var(--tint); }
@@ -21,7 +21,7 @@
 .fret.target span { background: var(--yellow); outline: 2px solid var(--ink); }
 .fret.correct span { background: var(--tone-success-bg); outline: 2px solid #376b46; }
 .fret.wrong span { background: var(--tone-pink-panel); outline: 2px solid var(--tone-focus); }
-.fret-feedback { min-height: 48px; font-size: 14px; line-height: 1.65; color: var(--muted); margin: 12px 0; }
+.fret-feedback { font-size: 14px; line-height: 1.65; color: var(--muted); margin: 12px 0; }
 .fret-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .note-answers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .note-answers button { min-width: 48px; min-height: 46px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--tint); color: var(--ink); }
@@ -39,13 +39,13 @@
   .short-board .fret { min-width: 36px; }
   .fret-actions .primary { flex-grow: 1; }
 }
-.level-summary { margin-top: 20px; }
+.level-summary { margin-top: 12px; }
 #current-level { font-weight: 700; font-size: 14px; margin: 0 0 10px; color: var(--primary); }
 #level-meter { display: block; width: 100%; height: 10px; accent-color: var(--primary); border: 0; border-radius: 12px; overflow: hidden; background: var(--tint); }
 #level-meter::-webkit-progress-bar { background: var(--tint); }
 #level-meter::-webkit-progress-value { background: var(--primary); }
 #level-meter::-moz-progress-bar { background: var(--primary); }
-.level-path { padding: 24px; background: var(--tint); border-radius: var(--radius); }
+.level-path { padding: 20px; background: var(--tint); border-radius: var(--radius); }
 .tier-section { border-top: 1px solid var(--line); }
 .tier-section summary { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 54px; padding: 12px 0; font-size: 14px; font-weight: 700; color: var(--ink); list-style: none; }
 .tier-section summary::-webkit-details-marker { display: none; }
@@ -77,3 +77,9 @@
 #typed-answer-error { margin-top: 12px; }
 .fret:focus-visible { outline-offset: -3px; z-index: 1; }
 @media (max-width: 360px) { .typed-answer-controls { flex-wrap: wrap; } }
+
+.fret-settings select { font-size: 16px; }
+#progress { margin-top: 0; }
+
+.level-scroll { max-height: 65vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; margin-top: 16px; padding: 0 4px; }
+.level-scroll .tier-section:first-child { border-top: 0; }

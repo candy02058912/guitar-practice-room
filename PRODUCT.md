@@ -17,7 +17,7 @@ The site accompanies smallpancakes’s guitar practice diary and welcomes its au
 The chord-change tool supports one-minute chord changes: start the timer on the first strum, estimate counts from subsequent strums, review and correct the result, and save progress on this device.
 
 ## Visual identity
-The user authorized two selectable palettes in the shared header. **Pancake** is the default, using the kawaii pastel colors of their [personal blog](http://smallpancakes.nekoweb.org/): cream paper, honey and peach surfaces, tan borders and warm brown actions, with sage success feedback. **Original pastel** restores purple actions, yellow paper, lavender prompts, mint guides and pink accents. Both retain Fredoka and DM Sans, the existing layout and practice behavior. The choice persists locally across tools and synchronizes between open tabs; blocked storage still allows switching colors on the current page.
+The user authorized two selectable palettes in the shared header. **Pancake** is the default, using the kawaii pastel colors of their [personal blog](http://smallpancakes.nekoweb.org/): cream paper, honey and peach surfaces, tan borders and warm brown actions, with sage success feedback. **Original pastel** restores purple actions, yellow paper, lavender prompts, mint guides and pink accents. Both retain Fredoka and DM Sans and share compact, task-focused layouts. Show short instructions only when needed, with no decorative slogans or encouragement cards. Audio settings and reference help are collapsed by default. Preserve the original smiling sun on the home page. Practice behavior stays unchanged. The choice persists locally across tools and synchronizes between open tabs; blocked storage still allows switching colors on the current page.
 
 ## Operating Context
 Hands occupied by a guitar. User confirmed one strum per chord change with automatic counting and correction before saving.
@@ -36,7 +36,7 @@ A third tool helps connect note names and locations. It begins with C, D and E o
 
 Fretboard progression offers 24 freely selectable levels across four tiers. Each location needs two successful recalls in that level; finishing the round awards completion. Both on-screen and guitar self-check practice count. Level progress and selection persist separately from existing recall totals.
 
-The fretboard sidebar uses four independently expandable tier groups with separate level numbers, names and progress. Melody building is removed from the fretboard practice flow; no separate melody tool is included.
+The fretboard sidebar directly displays four independently expandable tier groups with separate level numbers, names and progress. There is no outer Browse levels disclosure. Open the current tier by default and position the list at the current level. Melody building is removed from the fretboard practice flow; no separate melody tool is included.
 
 Keyboard practice uses a focused typed-answer field (fret number on the requested string or note name, accepting sharps/flats). Enter submits and continues after feedback. Arrow keys navigate fret and note buttons, with one Tab stop per group. Standard Tab/Enter navigation remains available throughout.
 

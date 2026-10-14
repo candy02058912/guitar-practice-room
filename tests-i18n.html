@@ -24,10 +24,10 @@ await test('All tools translate headings, labels, metadata and levels at desktop
  }
 });
 await test('Manual chord practice retains Space handling and locks language during a round',async()=>{
- await load('index.html?lang=zh-Hant');click('manual');assert(el('language').disabled);assert(el('status').textContent==='準備好就開始');
+ await load('index.html?lang=zh-Hant');click('manual');assert(el('language').disabled);assert(el('status').textContent==='準備計數');
  // Dispatch on the focused button, as a real keyboard event has an element target.
  el('tap').dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown',{code:'Space',bubbles:true}));
- assert(Number(el('count').textContent)>=1);assert(el('status').textContent.includes('繼續'));click('cancel');assert(!el('language').disabled);
+ assert(Number(el('count').textContent)>=1);assert(el('status').textContent.includes('計數中'));click('cancel');assert(!el('language').disabled);
 });
 await test('Fretboard quiz, validation, reveal and results are translated',async()=>{
  await load('fretboard.html?lang=zh-Hant');click('start');assert(el('language').disabled);assert(el('prompt').textContent.includes('找出'));assert(el('round-count').textContent==='第 1 / 6 題');
@@ -36,11 +36,11 @@ await test('Fretboard quiz, validation, reveal and results are translated',async
  assert(el('stage-title').textContent==='本輪完成');assert(el('prompt').textContent.includes('6 題'));assert(!el('language').disabled);
 });
 await test('Staff placement and standalone reading translate dynamic feedback',async()=>{
- await load('fretboard.html?lang=zh-Hant&answer=staff');await doc().fonts.ready;await tick();click('start');click('reveal');assert(doc().querySelector('.staff-result strong').textContent==='已顯示答案');assert(doc().querySelector('.staff-result p').textContent.includes('答案是'));
+ await load('fretboard.html?lang=zh-Hant&answer=staff');await doc().fonts.ready;await tick();click('start');click('reveal');assert(doc().querySelector('.staff-result strong').textContent==='已顯示答案');assert(doc().querySelector('.staff-result p').textContent.includes('答案：'));
  await load('staff.html?lang=zh-Hant');await doc().fonts.ready;await tick();click('start');assert(el('prompt').textContent==='這裡寫的是什麼音？');click('reveal');assert(el('feedback').textContent.includes('參考提示'));assert(!el('staff').getAttribute('aria-label').includes('clef'));
 });
 await test('Metronome tap feedback and beat accessibility labels are translated',async()=>{
- await load('metronome.html?lang=zh-Hant');click('tap-tempo');assert(el('tap-help').textContent==='繼續點按節拍…');assert(el('beat-lights').firstChild.getAttribute('aria-label')==='第 1 拍，重音');
+ await load('metronome.html?lang=zh-Hant');click('tap-tempo');assert(el('tap-help').textContent==='再點一下設定速度');assert(el('beat-lights').firstChild.getAttribute('aria-label')==='第 1 拍，重音');
  el('volume').value=0;el('volume').dispatchEvent(new Event('input'));assert(el('volume-value').textContent==='靜音');
 });
 await test('Selector persists choice across tools, restores English and preserves practice data',async()=>{

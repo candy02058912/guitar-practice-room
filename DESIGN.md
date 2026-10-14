@@ -1,6 +1,6 @@
 ---
 name: smallpancakes’s guitar practice room
-description: Playful guitar practice tools with Pancake and Original pastel palettes.
+description: Compact guitar practice tools with Pancake and Original pastel palettes.
 colors:
   paper: "#fff9e6"
   surface: "#ffffff"
@@ -21,17 +21,17 @@ colors:
 typography:
   display:
     fontFamily: "Fredoka, sans-serif"
-    fontSize: "clamp(40px, 5.4vw, 64px)"
-    fontWeight: 600
-    lineHeight: 1.03
-    letterSpacing: "-0.025em"
+    fontSize: "30px"
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: "-0.02em"
   body:
     fontFamily: "DM Sans, sans-serif"
     fontSize: "14px"
     fontWeight: 400
   timer:
     fontFamily: "Fredoka, sans-serif"
-    fontSize: "96px"
+    fontSize: "80px"
     fontWeight: 500
     lineHeight: 1.12
     letterSpacing: "-0.03em"
@@ -40,7 +40,7 @@ rounded:
   panel: "16px"
 spacing:
   control-gap: "8px"
-  panel-inline: "30px"
+  panel-inline: "24px"
   panel-inline-mobile: "20px"
   workspace-gap: "26px"
 components:
@@ -54,38 +54,38 @@ components:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     rounded: "{rounded.panel}"
-    padding: "23px 30px 0"
+    padding: "20px 24px 0"
 ---
 
 # Design System: smallpancakes’s guitar practice room
 
 ## Overview
 
-The public brand is **smallpancakes’s guitar practice room**, accompanying a guitar practice diary and inviting followers to practice along. The user authorized a choice between the default Pancake palette drawn from their [personal blog](http://smallpancakes.nekoweb.org/) and the Original pastel palette. Both retain the rounded typography, playful motifs and existing layout.
+The public brand is **smallpancakes’s guitar practice room**, accompanying a guitar practice diary and inviting followers to practice along. The user authorized a choice between the default Pancake palette drawn from their [personal blog](http://smallpancakes.nekoweb.org/) and the Original pastel palette. Both use rounded typography and compact, task-focused layouts.
 
-The default Pancake palette uses cream, honey, peach and warm browns while preserving all functions. The visual implementation uses rounded lettering, colorful chord controls, a pale peach timer band, a honey practice log and a slightly tilted peach practice note. A small geometric smiling sun adds personality to the heading.
+The default Pancake palette uses cream, honey, peach and warm browns. Keep the chord controls, timer and practice results visually distinct. Retain the original smiling sun beside the compact home heading (72px desktop, 56px mobile), as requested by the user. Encouragement cards, oversized slogans and promotional footers are removed. Show only actionable instructions by default; disclose secondary information when requested.
 
 ## Colors
 
-In Pancake, warm brown carries primary actions and the timer; dark brown supplies readable text. Cream paper, honey log/guide panels and peach encouragement panels apply the blog’s palette to the tools. The first chord has a peach field, the second a honey field. Darker derived action and hover browns keep white labels readable. Muted brown supports secondary text; tan borders define controls. Sage is reserved for success feedback and reddish brown on peach distinguishes incorrect answers. CSS uses semantic `--primary`, `--focus`, `--honey` and `--peach` names. The frontmatter records the default Pancake values. Color descriptions below refer to Pancake unless stated otherwise; both palettes share the same component roles.
+In Pancake, warm brown carries primary actions and the timer; dark brown supplies readable text. Cream paper, honey log panels and peach practice prompts apply the blog’s palette to the tools. The first chord has a peach field, the second a honey field. Darker derived action and hover browns keep white labels readable. Muted brown supports secondary text; tan borders define controls. Sage is reserved for success feedback and reddish brown on peach distinguishes incorrect answers. CSS uses semantic `--primary`, `--focus`, `--honey` and `--peach` names. The frontmatter records the default Pancake values. Color descriptions below refer to Pancake unless stated otherwise; both palettes share the same component roles.
 
 Original pastel uses yellow paper (`#fff9db`), plum ink (`#292447`), purple actions (`#6640c8`, hover `#4e2cab`), lavender prompts (`#eee6ff`), mint guides (`#d4f5dc`) and pink accents (`#ff96c1`). Its focus accent is dark pink (`#a52364`). `palettes.css` defines the shared `--tone-*` roles and their Original pastel overrides under `data-palette="pastel"`; component variables resolve through these roles. Preserve these semantic roles when adding surfaces so both palettes remain complete.
 
 ## Typography
 
-Fredoka supplies rounded display text, section headings and measurements. DM Sans supplies instructions and controls. Both are self-hosted in `assets/`, with their OFL licenses. Numerals remain tabular. The mobile heading is 43px (38px on the smallest screens); the mobile timer is 88px.
+Fredoka supplies rounded display text, section headings and measurements. DM Sans supplies instructions and controls. Both are self-hosted in `assets/`, with their OFL licenses. Numerals remain tabular. Page headings are 30px on desktop and 26px on mobile; the mobile timer is 88px. Use 16px selects to avoid mobile focus zoom.
 
 ## Layout
 
-The main container is 1128px wide. Desktop uses a 1.7:1 grid with a minimum 290px sidebar and a 26px gap. The timer is a full-width pale peach band inside the practice panel. The log and note sit in a vertical sidebar with different colored surfaces. At 760px and below, the page becomes a single column with 18px outer padding. The decorative sun sits alongside the heading without intercepting any controls.
+The main container is 1128px wide. Desktop uses a flexible practice column and a 300px sidebar with a 26px gap. The metronome uses a left-aligned panel up to 960px wide, with playback controls on the left and a 240px settings column on the right. These groups stack below 760px. At 760px and below, the page becomes a single column with 18px outer padding; language and palette selects share one row. Use short tool names as page headings. Keep primary actions close to the exercise. Audio settings, keyboard help and note references use native details disclosures. Fretboard levels appear directly in the sidebar, with each tier independently collapsible. The current tier opens by default; a bounded scroll region brings the current level into view without moving the exercise.
 
 ## Elevation & Depth
 
-Use flat color areas without shadows. A two-pixel brown outline anchors the practice panel. The log and note are separated by color. The note's slight rotation and tilted wordmark emblem bring playfulness without moving inputs or timer digits.
+Use flat color areas without shadows. A one-pixel tan border defines the practice panel. Retain the wordmark emblem and the original home-page sun; do not reintroduce decorative cards.
 
 ## Shapes
 
-Panels have the larger radius; controls have the smaller radius. The swap button is circular with a 44px target. Small duration and header badges are pills. SVG decoration is noninteractive and hidden from assistive technology.
+Panels have the larger radius; controls have the smaller radius. The swap button is circular with a 44px target. Small duration badges are pills. Musical SVG diagrams retain their accessible descriptions.
 
 ## Components
 
@@ -93,11 +93,11 @@ All IDs, inputs, event bindings and behavior remain unchanged. The primary actio
 
 ### Palette selector
 
-All four tool pages carry a native header select labeled Palette, with Pancake and Original pastel choices. `palette.js` reads `practice-room.palette.v1` before styles paint and sets the root `data-palette` to `pancake` or `pastel`. Selection updates the UI, browser theme color, favicon and themed SVG artwork. The choice persists across tool pages and synchronizes through storage events between tabs. If storage is blocked, switching still applies to the current page. Typography, geometry and practice state stay shared across palettes.
+All four tool pages carry a native header select labeled Palette, with Pancake and Original pastel choices. `palette.js` reads `practice-room.palette.v1` before styles paint and sets the root `data-palette` to `pancake` or `pastel`. Selection updates controls, browser theme color and favicon. The choice persists across tool pages and synchronizes through storage events between tabs. If storage is blocked, switching still applies to the current page. Typography, geometry and practice state stay shared across palettes.
 
 ### Shared brand header
 
-The full name appears in a two-line Fredoka wordmark beside the existing guitar emblem: smallpancakes’s above guitar practice room, with the warm brown terminal dot. The owner line uses primary warm brown at 16px, reducing to 14px on phones; the main wordmark reduces to 22px on phones. Keep the full name readable rather than abbreviating it. The desktop header note reads “Practice along with us.” and the footer reads “From our guitar diary to your daily practice.” Browser titles and sharing metadata use the full brand name. The home introduction welcomes diary followers to use the tools without an account; no social profile link is present until a real destination is supplied.
+The full name appears in a two-line Fredoka wordmark beside the existing guitar emblem: smallpancakes’s above guitar practice room, with the warm brown terminal dot. The owner line uses primary warm brown at 16px, reducing to 14px on phones; the main wordmark reduces to 22px on phones. Keep the full name readable rather than abbreviating it. The header contains only the brand, language and palette controls. Browser titles and sharing metadata use the full brand name. There are no welcome paragraphs, taglines or promotional footers.
 
 ### Fretboard staff answers
 
@@ -124,7 +124,7 @@ The staff fills the available width with a 300px maximum height, reduced to 250p
 
 A shared navigation row uses warm brown for the current tool and quiet text for the other. The metronome inherits the same two-column layout, rounded Fredoka measurements, pale peach activity band, honey guide and peach practice note. Tempo controls flank a large numeric input; numbered beat indicators show bar position and briefly fill warm brown (terracotta on accented beat one). The beat row shrinks to fit six beats on small screens. Settings remain below the Start and Tap tempo actions, with explicit labels and visible focus.
 
-The chord-change input setup uses a labeled device select beside Check input, a compact live level meter, current-source text and a Refresh devices action. It sits above the start action and inherits the existing pale peach controls and mobile wrapping. Signal feedback is not announced on every audio frame.
+The chord-change input setup uses a labeled device select beside Check input, a compact live level meter, current-source text and a Refresh devices action. It sits in the Audio settings disclosure below the start action and inherits the existing pale peach controls and mobile wrapping. Signal feedback is not announced on every audio frame.
 
 Input boost is a labeled range control with an adjacent dB readout in the audio setup. It follows the existing warm brown slider treatment, shows feedback on the level meter, and is disabled while a round is active.
 
@@ -135,3 +135,7 @@ Traditional Chinese (`zh-Hant`) uses the locally available Noto Sans TC, PingFan
 ### Traditional Chinese voice
 
 Write Traditional Chinese as natural, conversational Taiwanese usage rather than matching English sentence structure. Short headings, buttons and standalone hints do not need a final full stop. Keep punctuation in longer explanations where it helps reading. Prefer concrete actions such as 答對次數 over literal abstractions such as 成功回想次數, while preserving scoring rules, musical terminology, input formats and error-recovery steps.
+
+### Concise copy in both languages
+
+Instructions state the action or result, without encouragement or decorative sentences. Do not repeat visible information such as fret-marker positions or the timer duration in paragraphs. Use short empty states (No saved sessions / 還沒有練習紀錄). Keep recovery steps for errors and preserve scoring, privacy and audio limitations in the relevant settings or help disclosure.

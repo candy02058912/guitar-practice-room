@@ -19,7 +19,7 @@ const player = new Metronome({
     lockLanguage(state !== 'stopped');
     $('metro-toggle').textContent = state === 'stopped' ? t('Start metronome') : state === 'starting' ? t('Cancel starting') : t('Stop metronome');
     $('metro-toggle').setAttribute('aria-pressed', String(state !== 'stopped'));
-    $('metro-status').textContent = message || (state === 'playing' ? t('Find your rhythm. Keep it steady.') : state === 'starting' ? t('Getting your beat ready…') : t('Ready when you are.'));
+    $('metro-status').textContent = message || (state === 'playing' ? t('Playing') : state === 'starting' ? t('Starting…') : t('Ready'));
     document.body.classList.toggle('metro-playing', state === 'playing');
     if (state === 'stopped' && wakeLock) { void wakeLock.release().catch(() => {}); wakeLock = null; }
   },
@@ -62,7 +62,7 @@ $('bpm').addEventListener('keydown', event => { if (event.key === 'Enter') { set
 $('tempo-slider').addEventListener('input', () => setTempo($('tempo-slider').value));
 $('tap-tempo').addEventListener('click', () => {
   const bpm = tapTempo.tap(performance.now());
-  $('tap-help').textContent = bpm === null ? t('Keep tapping your beat…') : t`Tempo set to ${bpm} BPM. Keep tapping to refine.`;
+  $('tap-help').textContent = bpm === null ? t('Tap again to set tempo') : t`Tempo: ${bpm} BPM`;
   if (bpm !== null) setTempo(bpm);
 });
 $('beats-per-bar').value = settings.beats;

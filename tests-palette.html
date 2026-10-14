@@ -7,8 +7,8 @@ const select=value=>{const s=frame.contentDocument.getElementById('palette');s.v
 const color=()=>frame.contentWindow.getComputedStyle(frame.contentDocument.documentElement).getPropertyValue('--primary').trim();
 try {
  localStorage.removeItem(key);await load('index.html');
- await test('Blog palette defaults correctly; original palette updates page, illustration and browser chrome',()=>{
- assert(frame.contentDocument.documentElement.dataset.palette==='pancake');select('pastel');assert(localStorage.getItem(key)==='pastel');assert(color()==='#6640c8');assert(frame.contentDocument.querySelector('meta[name="theme-color"]').content==='#fff9db');assert(frame.contentDocument.querySelector('link[rel="icon"]').getAttribute('href').endsWith('favicon-pastel.svg'));assert(frame.contentWindow.getComputedStyle(frame.contentDocument.querySelector('.intro-art path')).fill==='rgb(255, 150, 193)');
+ await test('Blog palette defaults correctly; original palette updates controls and browser chrome',()=>{
+ assert(frame.contentDocument.documentElement.dataset.palette==='pancake');select('pastel');assert(localStorage.getItem(key)==='pastel');assert(color()==='#6640c8');assert(frame.contentDocument.querySelector('meta[name="theme-color"]').content==='#fff9db');assert(frame.contentDocument.querySelector('link[rel="icon"]').getAttribute('href').endsWith('favicon-pastel.svg'));assert(frame.contentWindow.getComputedStyle(frame.contentDocument.getElementById('chord-a')).backgroundColor==='rgb(255, 211, 228)');
  });
  await test('Palette persists across all tools and does not change practice records',async()=>{
  for(const page of ['metronome.html','fretboard.html','staff.html','index.html']){await load(page);assert(frame.contentDocument.getElementById('palette').value==='pastel',page+' selection');assert(color()==='#6640c8',page+' color')}

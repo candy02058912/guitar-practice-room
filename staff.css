@@ -2,7 +2,7 @@
 .staff-panel { padding-bottom: 24px; }
 .staff-settings { grid-template-columns: 1fr; }
 .staff-stage { background: var(--surface); }
-#staff { width: 100%; max-height: 300px; display: block; color: var(--ink); }
+#staff { width: 100%; max-height: 240px; display: block; color: var(--ink); }
 #staff .music-symbol { font-family: 'Bravura'; font-size: 80px; fill: currentColor; }
 #staff .staff-line { stroke: var(--muted); stroke-width: 1.4; }
 #staff .ledger-line { stroke: var(--ink); stroke-width: 1.8; }
@@ -17,5 +17,5 @@
 #explore-notes { max-height: 190px; overflow-y: auto; padding: 5px; }
 #explore-notes button[aria-pressed=true] { background: var(--primary); color: var(--surface); }
 #explore-notes button[aria-pressed=true]:hover { background: var(--primary-hover); }
-.practice-note a { color: var(--ink); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; }
-@media (max-width: 760px) { #staff { max-height: 250px; } }
+.guitar-reference a { color: var(--ink); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; }
+@media (max-width: 760px) { #staff { max-height: 220px; } }

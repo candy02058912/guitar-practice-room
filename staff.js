@@ -37,13 +37,13 @@ function draw() {
   svgElement('line', { x1: stemX, x2: stemX, y1: g.y, y2: g.y + (g.stemDown ? 60 : -60), class: 'note-stem' });
   $('note-caption').textContent = concealed ? t('Name this note') : t`${current.label} · written ${current.id.replace('#', '♯').replace('b', '♭')}`;
   const locations = guitarLocations(current).slice(0, 3).map(p => t`${p.string} string, ${p.fret ? t`fret ${p.fret}` : t('open')}`);
-  $('guitar-bridge').textContent = concealed ? t('After you answer, see where this pitch lives on your guitar.') : t`${current.label} on your guitar: ${locations.join('; ')}. These are the same sounding pitch.`;
+  $('guitar-bridge').textContent = concealed ? t('After you answer, see where this pitch lives on your guitar.') : t`${current.label} on guitar: ${locations.join('; ')}`;
 }
 function journey() {
   const p = progress(state, level);
   $('current-level').textContent = t`Level ${level.number} of 12 · ${TIERS[level.tier]}`;
   $('level-meter').max = p.total; $('level-meter').value = p.earned;
-  $('level-goal').textContent = t`${p.earned} / ${p.total} recalls earned. ${p.complete ? t('Level complete. Revisit whenever you like.') : t('Read every written note twice; finish the round to complete this level.')}`;
+  $('level-goal').textContent = t`${p.earned} / ${p.total} recalls`;
   $('path-count').textContent = t`${LEVELS.filter(l => progress(state, l).complete).length} / 12 complete`;
   $('path-list').replaceChildren();
   for (const [tier, title] of TIERS.entries()) {
@@ -71,6 +71,7 @@ function render() {
   lockLanguage(phase === 'quiz');
   const testing = phase === 'quiz', concealed = testing && !answered;
   $('scope').disabled = testing;
+  show('round-count', phase !== 'explore');
   show('answer-form', concealed); show('reveal', concealed); show('next', testing && answered);
   show('start', !testing); $('start').disabled = !ready; $('start').textContent = ready ? phase === 'result' ? t('Practice another 6') : t('Try 6 questions') : t('Loading notation…');
   show('listen', !concealed); $('listen').disabled = !ready;
@@ -86,10 +87,10 @@ function render() {
 }
 function explore() {
   stopSound(); phase = 'explore'; answered = false;
-  $('stage-title').textContent = t('Explore the staff'); $('round-count').textContent = t('No rush');
+  $('stage-title').textContent = t('Explore'); $('round-count').textContent = '';
   $('prompt').textContent = level.title;
-  $('prompt-help').textContent = level.id === 'familiar' ? t("C, D and E: the same notes at frets 1, 3 and 5 on your B string.") : t('Choose a note to see its position. Every neighboring line or space moves one letter.');
-  $('feedback').textContent = t('Look at the note’s position, say its name, then find it on your guitar.');
+  $('prompt-help').textContent = level.id === 'familiar' ? t("Choose a note to view it on the staff.") : t('Choose a note to view it on the staff.');
+  $('feedback').textContent = '';
   render();
 }
 function selectLevel(id) {
@@ -98,17 +99,17 @@ function selectLevel(id) {
 }
 function nextQuestion() {
   current = pick(state, level, current.id); question++; answered = false;
-  $('stage-title').textContent = t('A little sight-reading'); $('round-count').textContent = t`${question} of 6`;
-  $('prompt').textContent = t('What note is written here?'); $('prompt-help').textContent = t('Read its position and any sharp or flat. Type the note name, then Enter.');
+  $('stage-title').textContent = t('Practice'); $('round-count').textContent = t`${question} of 6`;
+  $('prompt').textContent = t('What note is written here?'); $('prompt-help').textContent = t('Type the note name, then Enter.');
   $('answer').value = ''; $('answer').removeAttribute('aria-invalid'); show('answer-error', false);
-  $('feedback').textContent = t('No timer. Give yourself a moment to read it.');
+  $('feedback').textContent = '';
   render(); $('answer').focus();
 }
 function grade(value, reveal = false) {
   if (phase !== 'quiz' || answered) return;
   answered = true; const correct = !reveal && matches(value, current);
   if (correct) { score++; credit(state, level, current); save(); }
-  $('feedback').textContent = t`${correct ? t("Yes!") : reveal ? t("With help:") : t("Keep practicing:")} This is ${current.label}, ${describe(current)}. ${correct ? '' : t('Read the spelling shown on the staff; an equivalent-sounding note can be written differently.')}`;
+  $('feedback').textContent = t`${correct ? t("Yes!") : reveal ? t("With help:") : t("Keep practicing:")} This is ${current.label}, ${describe(current)}. ${correct ? '' : t('Match the written sharp or flat.')}`;
   render(); $('next').focus();
 }
 $('answer-form').addEventListener('submit', e => {
@@ -124,9 +125,9 @@ $('next').addEventListener('click', () => {
   if (question < 6) { nextQuestion(); return; }
   phase = 'result'; const completed = completeLevel(state, level); save();
   $('stage-title').textContent = t('Round complete'); $('round-count').textContent = t('6 questions');
-  $('prompt').textContent = t`${score} of 6 read without help`; $('prompt-help').textContent = t('Review these written notes or practice another round.');
-  $('feedback').textContent = completed ? t('Level complete! You can move on or revisit these notes.') : t('Your earned recalls count toward this level. Keep going at your own pace.');
-  if (completed) { $('level-celebration').textContent = t`Level ${level.number} complete! Every written note read twice.`; show('level-celebration', true); }
+  $('prompt').textContent = t`${score} of 6 read without help`; $('prompt-help').textContent = '';
+  $('feedback').textContent = completed ? t('Level complete') : t('Progress saved');
+  if (completed) { $('level-celebration').textContent = t`Level ${level.number} complete`; show('level-celebration', true); }
   render(); $('start').focus();
 });
 $('explore').addEventListener('click', () => { explore(); $('start').focus(); });

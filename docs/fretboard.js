@@ -28,11 +28,13 @@ function savePath() {
   try { storage.setItem(modeKey(LEVEL_KEY), JSON.stringify(path)); } catch { saved = false; }
 }
 const openTiers = new Set([LEVELS.find(l => l.id === scope).tier]);
+let shownScope;
 function renderPath() {
+  const levelList = $('path-list'), previousScroll = levelList.scrollTop;
   const level = LEVELS.find(l => l.id === scope), progress = levelProgress(path, scope);
   $('current-level').textContent = t`Level ${level.number} of ${LEVELS.length} · ${TIERS[level.tier]}`;
   $('level-meter').max = progress.total; $('level-meter').value = progress.earned;
-  $('level-goal').textContent = t`${progress.earned} / ${progress.total} recalls earned. ${progress.complete ? t('Level complete — revisit whenever you like.') : t('Recall every location twice; finish the round to complete this level.')} ${onStaff() ? t('Staff placement progress is saved separately.') : t('Guitar self-checks count too.')}`;
+  $('level-goal').textContent = t`${progress.earned} / ${progress.total} recalls`;
   const complete = LEVELS.filter(l => levelProgress(path, l.id).complete).length;
   $('path-count').textContent = t`${complete} / ${LEVELS.length} complete`;
   $('path-list').replaceChildren();
@@ -58,6 +60,13 @@ function renderPath() {
     }
     section.append(list); $('path-list').append(section);
   }
+  // Keep the current level in view without scrolling the exercise itself.
+  if (shownScope !== scope) {
+    shownScope = scope;
+    const current = levelList.querySelector('[aria-current="step"]');
+    const offset = current.getBoundingClientRect().top - levelList.getBoundingClientRect().top;
+    levelList.scrollTop = offset - (levelList.clientHeight - current.offsetHeight) / 2;
+  } else levelList.scrollTop = previousScroll;
   const next = LEVELS.find(l => l.number > level.number && !levelProgress(path, l.id).complete) || LEVELS.find(l => !levelProgress(path, l.id).complete);
   setVisible('advance', phase !== 'quiz' && progress.complete && Boolean(next));
   if (next) { $('advance').textContent = t`Try level ${next.number}`; $('advance').dataset.level = next.id; }
@@ -71,8 +80,9 @@ function setVisible(id, visible) { $(id).hidden = !visible; }
 function guide() {
   $('note-guide').replaceChildren();
   const testing = phase === 'quiz';
-  $('guide-intro').textContent = testing ? t('Take your time. Picture the note, say its name, then find it. Use Show answer whenever you need it.')
-    : scope === 'starter' ? t('Start small: learn C, D and E on the B string.') : t('Explore this area before testing yourself. Natural notes are the letters A through G.');
+  document.querySelector('.note-guide').hidden = testing;
+  $('guide-intro').textContent = testing ? t('Reference hidden during practice.')
+    : scope === 'starter' ? t('C, D, E on the B string') : t('Notes in this level');
   if (!testing && pool.length <= 12) {
     for (const p of pool) {
       const row = document.createElement('div'); row.className = 'guide-row';
@@ -81,10 +91,10 @@ function guide() {
       row.append(name, loc); $('note-guide').append(row);
     }
   } else if (!testing) {
-    const p = document.createElement('p'); p.textContent = t('Thinnest string at the top, thickest at the bottom. The nut is beside fret 0. At fret 12, each open-string note repeats an octave higher.'); $('note-guide').append(p);
+    const p = document.createElement('p'); p.textContent = t('Top: thinnest string. 0: open string. Fret 12: one octave higher.'); $('note-guide').append(p);
   }
   const hits = pool.reduce((sum, p) => sum + (history[p.id]?.hits || 0), 0);
-  $('progress').textContent = saved ? (hits ? t`${hits} unassisted recalls in this area, saved on this browser.` : t('Your recall practice will be saved on this browser.')) : t('Storage is unavailable. Practice works, but progress lasts for this visit only.');
+  $('progress').textContent = saved ? (hits ? t`${hits} unassisted recalls` : t('Saved in this browser')) : t('Storage is unavailable. Practice works, but progress lasts for this visit only.');
 }
 function board() {
   const config = SCOPES[scope], board = $('fretboard'); board.replaceChildren();
@@ -124,13 +134,13 @@ function board() {
           answer(correct, p);
         }
         else {
-          $('feedback').textContent = t`${p.name} · ${locationText(p)}. Say it, play it, then look away and find it again.`;
+          $('feedback').textContent = t`${p.name} · ${locationText(p)}`;
           playNotes([p]);
         }
       }); board.append(b);
     }
   }
-  $('board-caption').textContent = config.strings.length === 1 ? t`${STRINGS[config.strings[0]].name} string${config.strings[0] === 1 ? t(' · second-thinnest') : ''}. 0 means open. Frets increase to the right.` : t('Thinnest string at top. Thickest at bottom. 0 means open. Scroll for more frets.');
+  $('board-caption').textContent = config.strings.length === 1 ? t`${STRINGS[config.strings[0]].name} string · 0: open` : t('Top: thinnest string · 0: open');
 }
 function nameAnswers() {
   $('note-answers').replaceChildren();
@@ -218,6 +228,7 @@ function tabStops() {
 function render() {
   lockLanguage(phase === 'quiz');
   $('scope').disabled = phase === 'quiz'; $('practice-mode').disabled = phase === 'quiz';
+  setVisible('round-count', phase !== 'learn');
   setVisible('start', phase !== 'quiz'); $('start').textContent = phase === 'result' ? t('Practice another 6') : t('Try 6 questions');
   setVisible('explore', phase !== 'learn');
   setVisible('reveal', phase === 'quiz' && !answered);
@@ -236,7 +247,7 @@ function nextQuestion() {
   target = choose(levelPool(path, scope), history, seen, previous); question++; answered = false; assisted = false;
   questionType = onStaff() ? 'name' : onGuitar() || question % 2 === 1 ? 'find' : 'name';
   if (onStaff()) staffInput.reset();
-  $('stage-title').textContent = onGuitar() ? t('Find it on your guitar') : t('A little recall');
+  $('stage-title').textContent = onGuitar() ? t('Find it on your guitar') : t('Practice');
   $('round-count').textContent = t`${question} of 6`;
   const sameName = pool.filter(p => p.string === target.string && p.name === target.name);
   const octave = sameName.length > 1 ? (target.midi === Math.min(...sameName.map(p => p.midi)) ? t('lower') : t('higher')) : '';
@@ -245,7 +256,7 @@ function nextQuestion() {
   $('prompt-help').textContent = onGuitar() ? t`Play the note, say its name, then reveal the location to check yourself.${target.fret === 0 || target.fret === 12 ? t` Use fret ${target.fret === 0 ? t("0 (open)") : '12'}.` : ''}` : questionType === 'find' ? t`Tap its location on the fretboard.${target.fret === 0 || target.fret === 12 ? t` Use fret ${target.fret === 0 ? t("0 (open)") : '12'} for this question.` : ''}` : t`${locationText(target)}. Choose the note name below.`;
   if (questionType === 'find' && octave) $('prompt-help').textContent = t`This string has two ${target.name} notes in this level, an octave apart. Choose the ${octave} pitch${octave === t('lower') ? t(', nearer the nut') : t(', farther up the neck')}.`;
   if (onStaff()) { $('prompt').textContent = t('Put this guitar position on the staff'); $('prompt-help').textContent = t`${locationText(target)}. Place its written pitch in guitar treble notation, including the octave.`; }
-  $('feedback').textContent = t('No timer. Give yourself a moment to remember.');
+  $('feedback').textContent = '';
   $('typed-answer').value = ''; $('typed-answer').removeAttribute('aria-invalid'); setVisible('typed-answer-error', false);
   render();
   if (questionType === 'name') $('fretboard').querySelector('.target')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -270,7 +281,7 @@ $('reveal').addEventListener('click', () => {
   if (answered) return;
   assisted = true; answered = true;
   if (!onGuitar()) record(false);
-  $('feedback').textContent = `${target.name} · ${locationText(target)}. ${onGuitar() ? t('Did you find it before revealing the answer?') : t('This counts as practice with help. Try saying the name as you play it.')}`;
+  $('feedback').textContent = `${target.name} · ${locationText(target)}. ${onGuitar() ? t('Did you find it before revealing the answer?') : t('Hint used; no progress earned.')}`;
   render(); $(onGuitar() ? 'remembered' : 'next').focus({ preventScroll: onStaff() });
   if (onStaff()) $('staff-answer').scrollIntoView({ block: 'start' });
 });
@@ -287,22 +298,22 @@ $('next').addEventListener('click', () => {
     const completedNow = finishLevel(path, scope); savePath();
     if (completedNow) {
       const level = LEVELS.find(l => l.id === scope);
-      $('level-celebration').textContent = t`Level ${level.number} complete! Every location recalled twice. Review these notes, or try the next level.`;
+      $('level-celebration').textContent = t`Level ${level.number} complete`;
       setVisible('level-celebration', true);
     }
     $('stage-title').textContent = t('Round complete'); $('round-count').textContent = t('6 questions');
     $('prompt').textContent = t`${score} of 6 recalled ${onGuitar() ? t('by self-check') : t('without help')}`;
-    $('prompt-help').textContent = score === 6 ? t('Those locations are getting familiar. Keep practicing or move on when your level is complete.') : t('Every attempt is practice. Review the notes below, then try another round.');
-    $('feedback').textContent = completedNow ? t('Level complete! You can try the next level or revisit these notes.') : t('Your earned recalls count toward this level. Keep going at your own pace.');
+    $('prompt-help').textContent = score === 6 ? '' : '';
+    $('feedback').textContent = completedNow ? t('Level complete') : t('Progress saved');
     render(); $('prompt').setAttribute('role', 'status'); $('start').focus();
   }
 });
 function explore() {
   stopAudio(); phase = 'learn'; target = undefined;
-  $('stage-title').textContent = t('Explore your notes'); $('round-count').textContent = t('No rush');
-  $('prompt').textContent = scope === 'starter' ? t('Start with C, D & E') : t('Get to know this patch of the neck');
-  $('prompt-help').textContent = t('Tap a labeled note to hear it. Then find it on your guitar.');
-  $('feedback').textContent = t('Learn the locations first. You can take as long as you like.');
+  $('stage-title').textContent = t('Explore'); $('round-count').textContent = '';
+  $('prompt').textContent = scope === 'starter' ? t('Start with C, D & E') : t('Notes in this level');
+  $('prompt-help').textContent = t('Tap a note to hear it.');
+  $('feedback').textContent = '';
   render();
 }
 $('explore').addEventListener('click', explore);

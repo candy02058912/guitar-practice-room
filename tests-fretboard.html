@@ -57,7 +57,7 @@ try{
  await test('Start hides learning answers and hint does not count as recall',()=>{
   assert($('note-guide').textContent.includes('Fret 1'));click('start');
   assert(!$('note-guide').textContent.includes('Fret 1'));assert($('scope').disabled);
-  click('reveal');assert(!$('next').hidden);assert($('feedback').textContent.includes('with help'));
+  click('reveal');assert(!$('next').hidden);assert($('feedback').textContent.includes('Hint used'));
   assert(Object.values(JSON.parse(localStorage.getItem(key))).reduce((n,v)=>n+v.hits,0)===0);
  });
  await test('Wrong answers teach the location and only count once',()=>{
@@ -72,7 +72,7 @@ try{
   assert(!$('start').hidden&&$('start').textContent==='Practice another 6');assert(!$('composer'));
  });
  await test('Tier groups retain readable current-level hover and disable selection during rounds',async()=>{
-  assert(d.querySelectorAll('.tier-section').length===4);
+  assert(!$('path-list').closest('details'));assert(d.querySelectorAll('.tier-section').length===4);assert(d.querySelector('.level-list button[aria-current]').closest('details').open);
   click('start');assert([...d.querySelectorAll('.level-list button')].every(b=>b.disabled));
   click('explore');
   const style=d.createElement('style');
@@ -146,6 +146,10 @@ try{
    const hits=Object.fromEntries(locations('b').map(p=>[p.id,p.fret===fret?0:2]));
    localStorage.setItem(LEVEL_KEY,JSON.stringify({selected:'b',levels:{b:{hits,complete:false}}}));
    await load();const doc=frame.contentDocument,get=id=>doc.getElementById(id);
+   const current=doc.querySelector('.level-list button[aria-current]'),list=get('path-list');
+   assert(current.closest('details').open,'saved level tier is open');
+   const row=current.getBoundingClientRect(),bounds=list.getBoundingClientRect();
+   assert(row.top>=bounds.top&&row.bottom<=bounds.bottom,'saved level is visible within the list');
    get('start').click();assert(get('prompt').textContent===`Find the ${word} B on the B string`);
    assert(get('prompt-help').textContent.includes('an octave apart'));
    get('typed-answer').value=String(fret);get('typed-answer-form').requestSubmit();
