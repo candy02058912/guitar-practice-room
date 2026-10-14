@@ -1,3 +1,4 @@
+import { t, translateMarkup } from './i18n.js';
 import { note, geometry } from './staff-engine.js';
 const letters = 'CDEFGAB';
 export function writtenPitch(midi) {
@@ -7,6 +8,7 @@ export function writtenPitch(midi) {
 }
 export function staffAnswer(root, submit) {
   root.innerHTML = `<h3>Place the note on the staff</h3><p class="small-copy">Click or tap a line or space. Use ↑ / ↓ to move the note, then Enter to check. Add a sharp or flat when needed.</p><div class="staff-result" role="status" hidden><strong></strong><p></p></div><svg class="answer-staff" viewBox="0 0 400 290" tabindex="0" role="slider" aria-label="Written guitar note" aria-valuemin="23" aria-valuemax="44"></svg><div class="staff-answer-controls"><label>Accidental <select aria-label="Accidental"><option value="">Natural</option><option value="#">Sharp ♯</option><option value="b">Flat ♭</option></select></label><button type="button" class="primary">Check staff answer</button></div><p class="small-copy staff-selection" role="status"></p>`;
+  translateMarkup(root);
   const svg = root.querySelector('svg'), accidental = root.querySelector('select'), check = root.querySelector('button'), status = root.querySelector('.staff-selection');
   let step = 34, placed = false, locked = false, result = null;
   const resultBox = root.querySelector('.staff-result');
@@ -24,7 +26,7 @@ export function staffAnswer(root, submit) {
     add('text',{x:48,y:140,class:'music-symbol'},'\uE050');
     add('text',{x:65,y:204,class:'octave-mark'},'8');
     svg.setAttribute('aria-valuenow',step);
-    svg.setAttribute('aria-valuetext',placed ? selection().id : 'No note placed; press an arrow key or tap the staff');
+    svg.setAttribute('aria-valuetext',placed ? selection().id : t('No note placed; press an arrow key or tap the staff'));
     svg.setAttribute('aria-disabled',String(locked)); svg.tabIndex=locked?-1:0;
     accidental.disabled=locked; check.disabled=locked||!placed;
     if (!placed) return;
@@ -38,12 +40,12 @@ export function staffAnswer(root, submit) {
       if(label) add('text',{x,y:275,'text-anchor':'middle',class:'staff-note-label'},label);
     }
     if (result?.kind === 'incorrect') {
-      drawNote(result.chosen,170,'chosen-note','Your answer');
-      drawNote(result.expected,295,'correct-note','Correct note');
-    } else drawNote(selection(),231,result ? 'correct-note' : '',result ? 'Correct note' : '');
+      drawNote(result.chosen,170,'chosen-note',t('Your answer'));
+      drawNote(result.expected,295,'correct-note',t('Correct note'));
+    } else drawNote(selection(),231,result ? 'correct-note' : '',result ? t('Correct note') : '');
   }
 
-  function place(value) { if(locked)return;step=Math.max(23,Math.min(44,value));placed=true;status.textContent='Note placed. Check your answer when ready.';draw(); }
+  function place(value) { if(locked)return;step=Math.max(23,Math.min(44,value));placed=true;status.textContent=t('Note placed. Check your answer when ready.');draw(); }
   svg.addEventListener('click',event=>{
     const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());
     place(Math.round(30+(160-point.y)/10)); svg.focus();
@@ -58,7 +60,7 @@ export function staffAnswer(root, submit) {
   check.addEventListener('click',()=>{if(placed&&!locked)submit(selection());});
   draw();
   return {
-    reset(){step=34;placed=false;locked=false;result=null;resultBox.hidden=true;root.querySelector('.staff-answer-controls').hidden=false;accidental.value='';status.textContent='No note placed yet.';draw();},
+    reset(){step=34;placed=false;locked=false;result=null;resultBox.hidden=true;root.querySelector('.staff-answer-controls').hidden=false;accidental.value='';status.textContent=t('No note placed yet.');draw();},
     focus(){svg.focus();},
     reveal(midi, assisted = false){
       if (locked) return;
@@ -66,11 +68,11 @@ export function staffAnswer(root, submit) {
       const n = correct ? chosen : writtenPitch(midi);
       result = { kind: assisted ? 'revealed' : correct ? 'correct' : 'incorrect', chosen, expected: n };
       resultBox.hidden=false;resultBox.dataset.result=result.kind;
-      resultBox.querySelector('strong').textContent=assisted ? 'Answer revealed' : correct ? 'Correct!' : 'Not quite';
-      resultBox.querySelector('p').textContent=assisted ? `The answer is ${pretty(n)}. No recall earned for this question.` : correct ? `${pretty(n)} is right — including the octave. Recall earned.` : `You placed ${pretty(chosen)}. The correct note is ${pretty(n)}.`;
+      resultBox.querySelector('strong').textContent=assisted ? t('Answer revealed') : correct ? t("Correct!") : t('Not quite');
+      resultBox.querySelector('p').textContent=assisted ? t`The answer is ${pretty(n)}. No recall earned for this question.` : correct ? t`${pretty(n)} is right — including the octave. Recall earned.` : t`You placed ${pretty(chosen)}. The correct note is ${pretty(n)}.`;
       root.querySelector('.staff-answer-controls').hidden=true;
       step=n.step;accidental.value=n.accidental;placed=true;locked=true;
-      status.textContent=`Correct position: written ${pretty(n)}. Press Enter for the next question.`;draw();
+      status.textContent=t`Correct position: written ${pretty(n)}. Press Enter for the next question.`;draw();
       svg.setAttribute('aria-valuetext', resultBox.textContent);
     }
   };

@@ -1,10 +1,11 @@
+import { t } from './i18n.js';
 // Positions are written pitches. Guitar sounds one octave below treble notation.
 const LETTERS = 'CDEFGAB';
 const PITCHES = [0, 2, 4, 5, 7, 9, 11];
 export const STAFF_KEY = 'practice-room.staff.v1';
 export function note(id) {
   const match = /^([A-G])([#b]?)([3-6])$/.exec(id);
-  if (!match) throw new Error('Invalid written note');
+  if (!match) throw new Error(t('Invalid written note'));
   const [, letter, accidental, octaveText] = match, octave = Number(octaveText);
   const index = LETTERS.indexOf(letter), step = octave * 7 + index;
   const writtenMidi = (octave + 1) * 12 + PITCHES[index] + (accidental === '#' ? 1 : accidental === 'b' ? -1 : 0);
@@ -17,20 +18,20 @@ function range(first, last) {
 }
 const staff = range('E4', 'F5'), wide = range('E3', 'A5');
 const alter = (ids, accidental) => ids.filter(id => !(accidental === '#' ? 'EB' : 'CF').includes(id[0])).map(id => id[0] + accidental + id.slice(1));
-export const TIERS = ['Lines & spaces', 'Beyond the staff', 'Sharps & flats'];
+export const TIERS = [t('Lines & spaces'), t('Beyond the staff'), t('Sharps & flats')];
 export const LEVELS = [
-  ['familiar', 'Your familiar C, D & E', 0, ['C5', 'D5', 'E5']],
-  ['lower-lines', 'Lower lines: E, G & B', 0, ['E4', 'G4', 'B4']],
-  ['upper-lines', 'Upper lines: B, D & F', 0, ['B4', 'D5', 'F5']],
-  ['spaces', 'The spaces spell FACE', 0, ['F4', 'A4', 'C5', 'E5']],
-  ['inside', 'All lines and spaces', 0, staff],
-  ['below', 'Just below: C & D', 1, ['C4', 'D4', 'E4']],
-  ['above', 'Just above: G & A', 1, ['F5', 'G5', 'A5']],
-  ['open-strings', 'Your six open strings', 1, ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']],
-  ['natural-range', 'Natural notes, low to high', 1, wide],
-  ['sharps', 'Read the sharps', 2, alter(staff, '#')],
-  ['flats', 'Read the flats', 2, alter(staff, 'b')],
-  ['mixed', 'Put it all together', 2, [...wide, ...alter(wide, '#'), ...alter(wide, 'b')]],
+  ['familiar', t('Your familiar C, D & E'), 0, ['C5', 'D5', 'E5']],
+  ['lower-lines', t("Lower lines: E, G & B"), 0, ['E4', 'G4', 'B4']],
+  ['upper-lines', t("Upper lines: B, D & F"), 0, ['B4', 'D5', 'F5']],
+  ['spaces', t('The spaces spell FACE'), 0, ['F4', 'A4', 'C5', 'E5']],
+  ['inside', t('All lines and spaces'), 0, staff],
+  ['below', t("Just below: C & D"), 1, ['C4', 'D4', 'E4']],
+  ['above', t("Just above: G & A"), 1, ['F5', 'G5', 'A5']],
+  ['open-strings', t('Your six open strings'), 1, ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']],
+  ['natural-range', t('Natural notes, low to high'), 1, wide],
+  ['sharps', t('Read the sharps'), 2, alter(staff, '#')],
+  ['flats', t('Read the flats'), 2, alter(staff, 'b')],
+  ['mixed', t('Put it all together'), 2, [...wide, ...alter(wide, '#'), ...alter(wide, 'b')]],
 ].map(([id, title, tier, ids], index) => ({ id, title, tier, number: index + 1, notes: ids.map(note).filter(n => n.midi >= 40 && n.midi <= 76) }));
 export function geometry(n) {
   const y = 160 - (n.step - 30) * 10, ledger = [];
@@ -40,9 +41,9 @@ export function geometry(n) {
 }
 export function describe(n) {
   const relative = n.step - 30;
-  const where = relative >= 0 && relative <= 8 ? (relative % 2 === 0 ? `line ${relative / 2 + 1} from the bottom` : `space ${(relative + 1) / 2} from the bottom`)
-    : `${Math.abs(relative < 0 ? relative : relative - 8)} line-or-space steps ${relative < 0 ? 'below' : 'above'} the staff`;
-  return `${where}${n.accidental ? `, with a ${n.accidental === '#' ? 'sharp' : 'flat'}` : ', no accidental'}`;
+  const where = relative >= 0 && relative <= 8 ? (relative % 2 === 0 ? t`line ${relative / 2 + 1} from the bottom` : t`space ${(relative + 1) / 2} from the bottom`)
+    : t`${Math.abs(relative < 0 ? relative : relative - 8)} line-or-space steps ${relative < 0 ? t('below') : t('above')} the staff`;
+  return `${where}${n.accidental ? t`, with a ${n.accidental === '#' ? t('sharp') : t('flat')}` : t(', no accidental')}`;
 }
 export function parseAnswer(value) {
   const normalized = value.trim().replaceAll('♯', '#').replaceAll('♭', 'b');
@@ -54,7 +55,7 @@ export function matches(value, n) {
   const parsed = parseAnswer(value);
   return Boolean(parsed && parsed.name === n.name && (parsed.octave === null || parsed.octave === n.octave));
 }
-const tuning = [{ name: 'high E', midi: 64 }, { name: 'B', midi: 59 }, { name: 'G', midi: 55 }, { name: 'D', midi: 50 }, { name: 'A', midi: 45 }, { name: 'low E', midi: 40 }];
+const tuning = [{ name: t('high E'), midi: 64 }, { name: 'B', midi: 59 }, { name: 'G', midi: 55 }, { name: 'D', midi: 50 }, { name: 'A', midi: 45 }, { name: t('low E'), midi: 40 }];
 export function guitarLocations(n) {
   return tuning.map(s => ({ string: s.name, fret: n.midi - s.midi })).filter(p => p.fret >= 0 && p.fret <= 12).sort((a, b) => a.fret - b.fret);
 }

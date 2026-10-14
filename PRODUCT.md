@@ -1,4 +1,4 @@
-# smallpancake’s guitar practice room
+# smallpancakes’s guitar practice room
 
 <!-- impeccable:product-schema 1 -->
 
@@ -9,10 +9,10 @@ web
 Delegated by the user. Plain HTML, CSS and JavaScript: no build step or dependencies, served locally or over HTTPS.
 
 ## Users
-A guitar learner following Justin Guitar, and followers of smallpancake’s guitar practice diary who want to practice along using the same tools and track their own progress.
+A guitar learner following Justin Guitar, and followers of smallpancakes’s guitar practice diary who want to practice along using the same tools and track their own progress.
 
 ## Product Purpose
-The site accompanies smallpancake’s guitar practice diary and welcomes its audience to use the same chord-change, metronome and fretboard tools. The public name is **smallpancake’s guitar practice room**. Visitors can practice without an account; progress stays in their own browser. No social handle or profile URL has been supplied.
+The site accompanies smallpancakes’s guitar practice diary and welcomes its audience to use the same chord-change, metronome and fretboard tools. The public name is **smallpancakes’s guitar practice room**. Visitors can practice without an account; progress stays in their own browser. The account name is **smallpancakes**. No social profile URL has been supplied.
 
 The chord-change tool supports one-minute chord changes: start the timer on the first strum, estimate counts from subsequent strums, review and correct the result, and save progress on this device.
 

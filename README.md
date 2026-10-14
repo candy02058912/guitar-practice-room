@@ -1,10 +1,18 @@
-# smallpancake’s guitar practice room
+# smallpancakes’s guitar practice room
 
-The companion tools for smallpancake’s guitar practice diary, so anyone can follow along without an account.
+The companion tools for smallpancakes’s guitar practice diary, so anyone can follow along without an account.
 
 A small, dependency-free guitar practice toolbox with a one-minute chord-change timer, a metronome and fretboard practice with note-name or staff answers. Choose a chord pair, enable the microphone, wait for the quiet-level check, then strum to start a 60-second round. Strum once per chord; each detected strum counts as one, including the first. Review the estimate before saving.
 
-Use **Palette** in the header to choose **Pancake**, the default cream, honey, peach and warm brown colors from [smallpancake’s personal blog](http://smallpancakes.nekoweb.org/), or **Original pastel**, the earlier purple, mint, pink and yellow colors. The choice is shared across the tools, remembered in this browser and synchronized between open tabs. If storage is blocked, the chosen colors still apply on the current page. `tests-palette.html` checks the palette switcher.
+Use **Palette** in the header to choose **Pancake**, the default cream, honey, peach and warm brown colors from [smallpancakes’s personal blog](http://smallpancakes.nekoweb.org/), or **Original pastel**, the earlier purple, mint, pink and yellow colors. The choice is shared across the tools, remembered in this browser and synchronized between open tabs. If storage is blocked, the chosen colors still apply on the current page. `tests-palette.html` checks the palette switcher.
+
+## Language
+
+Use **Language / 語言** in the header to choose **English** or **繁體中文** (Traditional Chinese). The choice is remembered across tools and visits. On the first visit, Traditional Chinese browser preferences (`zh-Hant`, `zh-TW`, `zh-HK`, `zh-MO`) select Traditional Chinese; other languages fall back to English. Links with `?lang=zh-Hant` or `?lang=en` override the saved choice and work when storage is blocked.
+
+Switch languages between rounds; the selector is disabled during practice and while a chord result awaits saving or discarding. Switching reloads the page. Saved practice records, level identifiers, chord symbols and note names are shared between languages. Practice-log dates follow the selected language.
+
+Translations live in `translations-zh-Hant.js`, keyed by English source text. `i18n.js` translates authored markup once; runtime messages use `t('message')` or tagged templates with reorderable numbered placeholders. Add new user-facing messages to the catalog and wrap dynamic messages with `t`. `tests-i18n.html` covers language detection, persistence, blocked storage, all tools, quiz feedback, keyboard behavior and narrow layouts.
 
 ## USB guitar input (including Mustang Micro Plus)
 

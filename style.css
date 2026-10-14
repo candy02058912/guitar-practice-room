@@ -300,3 +300,12 @@ kbd { font-size: 11px; font-family: inherit; border: 1px solid #ffffff65; border
   .header-actions { margin-left: auto; }
   .palette-control { display: flex; align-items: center; gap: 10px; }
 }
+
+/* CJK copy uses the system's Traditional Chinese fonts and keeps controls flexible. */
+html:lang(zh-Hant) { font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; }
+html:lang(zh-Hant) .intro h1 { line-height: 1.2; letter-spacing: 0; }
+.header-actions { flex-wrap: wrap; }
+.language-control select { min-width: 7rem; }
+@media (max-width: 600px) {
+  html:lang(zh-Hant) .intro h1 { max-width: none; font-size: clamp(30px, 8.2vw, 43px); }
+}

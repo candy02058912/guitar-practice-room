@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Language checks</title><pre id="results">Running…</pre><iframe id="app" title="Language test" width="1100" height="1700"></iframe><script type="module">
+import { resolveLocale } from './i18n.js';
+const results=[], key='practice-room.language.v1', backup=localStorage.getItem(key), frame=document.getElementById('app');
+const assert=(value,message='assertion failed')=>{if(!value)throw Error(message)};
+const test=async(name,fn)=>{try{await fn();results.push('PASS '+name)}catch(error){results.push('FAIL '+name+': '+error.message)}};
+const load=page=>new Promise(resolve=>{frame.onload=resolve;frame.src=page});
+const doc=()=>frame.contentDocument, el=id=>doc().getElementById(id);
+const click=id=>el(id).click();
+const tick=()=>new Promise(resolve=>setTimeout(resolve,80));
+try {
+await test('Locale detection, explicit preference and unsupported-language fallback',()=>{
+ assert(resolveLocale(null,null,['zh-TW'])==='zh-Hant');assert(resolveLocale(null,null,['zh-Hant-HK'])==='zh-Hant');assert(resolveLocale(null,null,['zh-HK'])==='zh-Hant');
+ assert(resolveLocale(null,null,['zh-CN','en'])==='en');assert(resolveLocale(null,null,['fr'])==='en');
+ assert(resolveLocale(null,'en',['zh-TW'])==='en');assert(resolveLocale('zh-Hant','en',['en'])==='zh-Hant');assert(resolveLocale('invalid','invalid',['en'])==='en');
+});
+await test('All tools translate headings, labels, metadata and levels at desktop and mobile widths',async()=>{
+ for(const page of ['index.html','metronome.html','fretboard.html','staff.html']){
+  await load(page+'?lang=zh-Hant');
+  assert(doc().documentElement.lang==='zh-Hant',page+' lang');assert(el('language').value==='zh-Hant');
+  assert(doc().title.includes('吉他練習室'),page+' title');assert(doc().querySelector('h1').textContent.match(/[\u3400-\u9fff]/),page+' heading');
+  assert(doc().querySelector('.tool-nav').getAttribute('aria-label')==='練習工具');
+  if(el('scope'))assert(/[\u3400-\u9fff]/.test(el('scope').options[0].text),page+' level');
+  for(const width of [1100,340]){frame.width=width;await tick();assert(doc().documentElement.scrollWidth<=frame.contentWindow.innerWidth,page+' overflow at '+width)}
+ }
+});
+await test('Manual chord practice retains Space handling and locks language during a round',async()=>{
+ await load('index.html?lang=zh-Hant');click('manual');assert(el('language').disabled);assert(el('status').textContent==='準備好就開始');
+ // Dispatch on the focused button, as a real keyboard event has an element target.
+ el('tap').dispatchEvent(new frame.contentWindow.KeyboardEvent('keydown',{code:'Space',bubbles:true}));
+ assert(Number(el('count').textContent)>=1);assert(el('status').textContent.includes('繼續'));click('cancel');assert(!el('language').disabled);
+});
+await test('Fretboard quiz, validation, reveal and results are translated',async()=>{
+ await load('fretboard.html?lang=zh-Hant');click('start');assert(el('language').disabled);assert(el('prompt').textContent.includes('找出'));assert(el('round-count').textContent==='第 1 / 6 題');
+ el('typed-answer').value='invalid';el('typed-answer-form').dispatchEvent(new Event('submit',{cancelable:true}));assert(el('typed-answer-error').textContent.includes('整數'));
+ for(let i=0;i<6;i++){click('reveal');assert(!/[a-z]{3}/i.test(el('feedback').textContent),'English feedback');click('next')}
+ assert(el('stage-title').textContent==='本輪完成');assert(el('prompt').textContent.includes('6 題'));assert(!el('language').disabled);
+});
+await test('Staff placement and standalone reading translate dynamic feedback',async()=>{
+ await load('fretboard.html?lang=zh-Hant&answer=staff');await doc().fonts.ready;await tick();click('start');click('reveal');assert(doc().querySelector('.staff-result strong').textContent==='已顯示答案');assert(doc().querySelector('.staff-result p').textContent.includes('答案是'));
+ await load('staff.html?lang=zh-Hant');await doc().fonts.ready;await tick();click('start');assert(el('prompt').textContent==='這裡寫的是什麼音？');click('reveal');assert(el('feedback').textContent.includes('參考提示'));assert(!el('staff').getAttribute('aria-label').includes('clef'));
+});
+await test('Metronome tap feedback and beat accessibility labels are translated',async()=>{
+ await load('metronome.html?lang=zh-Hant');click('tap-tempo');assert(el('tap-help').textContent==='繼續點按節拍…');assert(el('beat-lights').firstChild.getAttribute('aria-label')==='第 1 拍，重音');
+ el('volume').value=0;el('volume').dispatchEvent(new Event('input'));assert(el('volume-value').textContent==='靜音');
+});
+await test('Selector persists choice across tools, restores English and preserves practice data',async()=>{
+ const before=Object.fromEntries(Object.entries(localStorage).filter(([k])=>k!==key));
+ const change=value=>new Promise(resolve=>{frame.onload=resolve;el('language').value=value;el('language').dispatchEvent(new Event('change'))});
+ await change('en');assert(doc().documentElement.lang==='en');assert(el('metro-toggle').textContent==='Start metronome');assert(localStorage.getItem(key)==='en');
+ await change('zh-Hant');await load('index.html');assert(doc().documentElement.lang==='zh-Hant');
+ assert(JSON.stringify(before)===JSON.stringify(Object.fromEntries(Object.entries(localStorage).filter(([k])=>k!==key))),'practice records changed');
+});
+await test('Blocked storage still renders browser-selected Traditional Chinese and carries language in links',async()=>{
+ let source=await (await fetch('fretboard.html')).text();
+ source=source.replace('<head>',`<head><base href="${new URL('./',location.href)}"><script>Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}});Object.defineProperty(navigator,'languages',{value:['zh-TW']});<\/script>`);
+ await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=source});
+ assert(doc().documentElement.lang==='zh-Hant');assert(el('progress').textContent.includes('無法儲存'));assert(doc().querySelector('.tool-nav a').href.includes('lang=zh-Hant'));assert(!el('language').disabled);
+});
+}finally{backup===null?localStorage.removeItem(key):localStorage.setItem(key,backup)}
+document.getElementById('results').textContent=results.join('\n');document.title=results.some(result=>result.startsWith('FAIL'))?'FAIL':'PASS';
+</script></html>

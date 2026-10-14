@@ -1,3 +1,4 @@
+import { t, lockLanguage } from './i18n.js';
 import { Metronome, TapTempo, normalizeTempo } from './metronome-engine.js';
 const $ = id => document.getElementById(id);
 const key = 'practice-room.metronome.v1';
@@ -15,9 +16,10 @@ let wakeLock, beatFlash;
 const tapTempo = new TapTempo();
 const player = new Metronome({
   onState(state, message) {
-    $('metro-toggle').textContent = state === 'stopped' ? 'Start metronome' : state === 'starting' ? 'Cancel starting' : 'Stop metronome';
+    lockLanguage(state !== 'stopped');
+    $('metro-toggle').textContent = state === 'stopped' ? t('Start metronome') : state === 'starting' ? t('Cancel starting') : t('Stop metronome');
     $('metro-toggle').setAttribute('aria-pressed', String(state !== 'stopped'));
-    $('metro-status').textContent = message || (state === 'playing' ? 'Find your rhythm. Keep it steady.' : state === 'starting' ? 'Getting your beat ready…' : 'Ready when you are.');
+    $('metro-status').textContent = message || (state === 'playing' ? t('Find your rhythm. Keep it steady.') : state === 'starting' ? t('Getting your beat ready…') : t('Ready when you are.'));
     document.body.classList.toggle('metro-playing', state === 'playing');
     if (state === 'stopped' && wakeLock) { void wakeLock.release().catch(() => {}); wakeLock = null; }
   },
@@ -41,7 +43,7 @@ function drawBeats() {
   for (let i = 0; i < settings.beats; i++) {
     const beat = document.createElement('span');
     beat.className = 'beat-light'; beat.textContent = i + 1;
-    beat.setAttribute('role', 'listitem'); beat.setAttribute('aria-label', `Beat ${i + 1}${i === 0 && settings.accent ? ', accented' : ''}`);
+    beat.setAttribute('role', 'listitem'); beat.setAttribute('aria-label', t`Beat ${i + 1}${i === 0 && settings.accent ? t(', accented') : ''}`);
     $('beat-lights').append(beat);
   }
   $('beat-lights').classList.toggle('has-accent', settings.accent);
@@ -60,7 +62,7 @@ $('bpm').addEventListener('keydown', event => { if (event.key === 'Enter') { set
 $('tempo-slider').addEventListener('input', () => setTempo($('tempo-slider').value));
 $('tap-tempo').addEventListener('click', () => {
   const bpm = tapTempo.tap(performance.now());
-  $('tap-help').textContent = bpm === null ? 'Keep tapping your beat…' : `Tempo set to ${bpm} BPM. Keep tapping to refine.`;
+  $('tap-help').textContent = bpm === null ? t('Keep tapping your beat…') : t`Tempo set to ${bpm} BPM. Keep tapping to refine.`;
   if (bpm !== null) setTempo(bpm);
 });
 $('beats-per-bar').value = settings.beats;
@@ -70,7 +72,7 @@ $('beats-per-bar').addEventListener('change', () => {
 $('accent-first').checked = settings.accent;
 $('accent-first').addEventListener('change', () => { settings.accent = $('accent-first').checked; player.configure(settings); drawBeats(); persist(); });
 $('volume').value = Math.round(settings.volume * 100);
-function updateVolumeLabel() { $('volume-value').textContent = settings.volume === 0 ? 'Muted' : `${Math.round(settings.volume * 100)}%`; }
+function updateVolumeLabel() { $('volume-value').textContent = settings.volume === 0 ? t('Muted') : `${Math.round(settings.volume * 100)}%`; }
 $('volume').addEventListener('input', () => { settings.volume = Number($('volume').value) / 100; player.configure(settings); updateVolumeLabel(); persist(); });
 async function toggle() {
   if (player.state !== 'stopped') { player.stop(); return; }
@@ -84,7 +86,7 @@ async function toggle() {
       else await lock?.release();
     } catch { /* Keeping the screen awake is optional. */ }
   } catch (error) {
-    $('metro-error').textContent = error.message || 'Audio could not start. Check your device’s sound settings and try again.';
+    $('metro-error').textContent = error.message || t('Audio could not start. Check your device’s sound settings and try again.');
     $('metro-error').hidden = false;
   }
 }
@@ -95,7 +97,7 @@ document.addEventListener('keydown', event => {
   }
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && player.state !== 'stopped') player.stop('Paused while you were away. Press Start to continue.');
+  if (document.hidden && player.state !== 'stopped') player.stop(t('Paused while you were away. Press Start to continue.'));
 });
 window.addEventListener('pagehide', () => player.stop());
 setTempo(settings.bpm); drawBeats(); updateVolumeLabel();

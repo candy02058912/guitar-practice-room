@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 export const MIN_BPM = 40;
 export const MAX_BPM = 240;
 export function normalizeTempo(value, fallback = 80) {
@@ -47,7 +48,7 @@ export class Metronome {
     this.onBeat = onBeat;
     this.createContext = createContext || (() => {
       const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) throw new Error('This browser cannot play the metronome. Try a current Chrome, Safari, Firefox or Edge browser.');
+      if (!Audio) throw new Error(t('This browser cannot play the metronome. Try a current Chrome, Safari, Firefox or Edge browser.'));
       return new Audio();
     });
     this.clock = new BeatClock();
@@ -80,14 +81,14 @@ export class Metronome {
       this.context = context;
       await context.resume();
       if (generation !== this.generation) return;
-      if (context.state !== 'running') throw new Error('Audio could not start. Check your device’s audio settings, then try again.');
+      if (context.state !== 'running') throw new Error(t('Audio could not start. Check your device’s audio settings, then try again.'));
       this.master = context.createGain();
       this.master.gain.setValueAtTime(this.volume, context.currentTime);
       this.master.connect(context.destination);
       this.clock.reset(context.currentTime);
       this.state = 'playing';
       context.onstatechange = () => {
-        if (this.state === 'playing' && context.state !== 'running') this.stop('Audio paused. Press Start to continue.');
+        if (this.state === 'playing' && context.state !== 'running') this.stop(t('Audio paused. Press Start to continue.'));
       };
       this.onState('playing');
       this.schedule();

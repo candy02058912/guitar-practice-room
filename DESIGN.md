@@ -1,5 +1,5 @@
 ---
-name: smallpancake’s guitar practice room
+name: smallpancakes’s guitar practice room
 description: Playful guitar practice tools with Pancake and Original pastel palettes.
 colors:
   paper: "#fff9e6"
@@ -57,11 +57,11 @@ components:
     padding: "23px 30px 0"
 ---
 
-# Design System: smallpancake’s guitar practice room
+# Design System: smallpancakes’s guitar practice room
 
 ## Overview
 
-The public brand is **smallpancake’s guitar practice room**, accompanying a guitar practice diary and inviting followers to practice along. The user authorized a choice between the default Pancake palette drawn from their [personal blog](http://smallpancakes.nekoweb.org/) and the Original pastel palette. Both retain the rounded typography, playful motifs and existing layout.
+The public brand is **smallpancakes’s guitar practice room**, accompanying a guitar practice diary and inviting followers to practice along. The user authorized a choice between the default Pancake palette drawn from their [personal blog](http://smallpancakes.nekoweb.org/) and the Original pastel palette. Both retain the rounded typography, playful motifs and existing layout.
 
 The default Pancake palette uses cream, honey, peach and warm browns while preserving all functions. The visual implementation uses rounded lettering, colorful chord controls, a pale peach timer band, a honey practice log and a slightly tilted peach practice note. A small geometric smiling sun adds personality to the heading.
 
@@ -97,7 +97,7 @@ All four tool pages carry a native header select labeled Palette, with Pancake a
 
 ### Shared brand header
 
-The full name appears in a two-line Fredoka wordmark beside the existing guitar emblem: smallpancake’s above guitar practice room, with the warm brown terminal dot. The owner line uses primary warm brown at 16px, reducing to 14px on phones; the main wordmark reduces to 22px on phones. Keep the full name readable rather than abbreviating it. The desktop header note reads “Practice along with us.” and the footer reads “From our guitar diary to your daily practice.” Browser titles and sharing metadata use the full brand name. The home introduction welcomes diary followers to use the tools without an account; no social profile link is present until a real destination is supplied.
+The full name appears in a two-line Fredoka wordmark beside the existing guitar emblem: smallpancakes’s above guitar practice room, with the warm brown terminal dot. The owner line uses primary warm brown at 16px, reducing to 14px on phones; the main wordmark reduces to 22px on phones. Keep the full name readable rather than abbreviating it. The desktop header note reads “Practice along with us.” and the footer reads “From our guitar diary to your daily practice.” Browser titles and sharing metadata use the full brand name. The home introduction welcomes diary followers to use the tools without an account; no social profile link is present until a real destination is supplied.
 
 ### Fretboard staff answers
 
@@ -127,3 +127,11 @@ A shared navigation row uses warm brown for the current tool and quiet text for 
 The chord-change input setup uses a labeled device select beside Check input, a compact live level meter, current-source text and a Refresh devices action. It sits above the start action and inherits the existing pale peach controls and mobile wrapping. Signal feedback is not announced on every audio frame.
 
 Input boost is a labeled range control with an adjacent dB readout in the audio setup. It follows the existing warm brown slider treatment, shows feedback on the level meter, and is disabled while a round is active.
+
+### Traditional Chinese typography
+
+Traditional Chinese (`zh-Hant`) uses the locally available Noto Sans TC, PingFang TC or Microsoft JhengHei, with a sans-serif fallback. Display headings keep the existing size and color, with a 1.2 line height and normal letter spacing for Chinese. The shared language selector uses the existing palette-control styling, and header actions wrap on narrow screens.
+
+### Traditional Chinese voice
+
+Write Traditional Chinese as natural, conversational Taiwanese usage rather than matching English sentence structure. Short headings, buttons and standalone hints do not need a final full stop. Keep punctuation in longer explanations where it helps reading. Prefer concrete actions such as 答對次數 over literal abstractions such as 成功回想次數, while preserving scoring rules, musical terminology, input formats and error-recovery steps.
